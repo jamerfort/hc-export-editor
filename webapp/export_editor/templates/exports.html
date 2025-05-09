@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Export Editor</title>
+    <link href="/static/style.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <h1>Export Editor</h1>
+
+    <div id="contents">
+      <div id="directories">
+        <h2>Export Directories</h2>
+        {% for dir in dirs %}
+        <div class="dir">
+          <h3>{{dir.path}}</h3>
+
+          {% for export in dir.exports() %}
+            <div class="export"><a href="{{export.link}}">{{export.path.name}}</a></div> 
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>
+

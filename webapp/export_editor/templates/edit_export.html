@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Export Editor</title>
+    <link href="/static/style.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <h1>Export Editor</h1>
+
+    <div id="contents">
+      <form class="editor" action="{{export.link}}/modify" method="post" target="_blank">
+
+        <div class="header">
+          <div class="left">
+            <h2 class="export">File Name: {{export.path.name}}</h2> 
+            <div class="dir">Directory: <a href="/exports">{{dir.path}}</a></div>
+          </div>
+
+          <div class="generate">
+            <input type="submit" tabindex="1" value="Generate Modified Export" />
+          </div>
+        </div> <!-- header -->
+
+        <div class="main">
+          {% if details.interfaces %}
+          <div class="interfaces">
+            <h3>Interface Settings
+              <input type="text" data-table-selector=".interfaces-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
+            </h3>
+
+            <table class="interfaces-table">
+              <thead>
+                <tr>
+                  <th>Interface</th>
+                  <th>Setting</th>
+                  <th>Current Value</th>
+                  <th>New Value</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for interface in details.interfaces %}
+                  {% for setting in interface.settings_and_attrs() %}
+                    <tr class="{{(loop.last and 'last') or ''}}">
+                      {% if loop.first %}
+                       <td>{{interface.name}}</td>
+                      {% else %}
+                       <td></td>
+                      {% endif %}
+
+                      <td>{{setting.name}}</td>
+                      <td>{{setting.value}}</td>
+
+                      <td><input type="text" autocomplete="off" autofocus tabindex="1"
+                            name="{{interface.form_name()}}|{{setting.form_name()}}"
+                            id="{{interface.name}}.{{setting.name}}"
+                            value="{{setting.value}}"/></td>
+                    </tr>
+                  {% endfor %}
+                {% endfor %}
+
+              </tbody>
+            </table>
+
+          </div> <!-- interfaces -->
+          {% endif %}
+
+          {% if details.tables %}
+          <div class="tables">
+            <h3>
+              <span>Lookup Tables</span>
+              <input type="text" data-table-selector=".tables-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
+            </h3>
+
+            <table class="tables-table">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                  <th>Key</th>
+                  <th>Current Value</th>
+                  <th>New Value</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for table in details.tables %}
+                  {% for row in table.rows %}
+                    <tr class="{{(loop.last and 'last') or ''}}">
+                      {% if loop.first %}
+                       <td>{{table.name}}</td>
+                      {% else %}
+                       <td></td>
+                      {% endif %}
+
+                      <td>{{row.key}}</td>
+                      <td>{{row.value}}</td>
+
+                      <td><input type="text" autocomplete="off" autofocus tabindex="1"
+                            name="{{table.form_name()}}|{{row.form_name()}}"
+                            id="{{table.name}}.{{row.key}}"
+                            value="{{row.value}}"/></td>
+                    </tr>
+                  {% endfor %}
+                {% endfor %}
+
+              </tbody>
+            </table>
+
+          </div> <!-- tables -->
+          {% endif %}
+        </div> <!-- main -->
+      </form>
+
+    </div> <!-- contents -->
+    <script src="/static/table_filters.js"></script>
+  </body>
+</html>
+
