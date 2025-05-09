@@ -64,5 +64,12 @@ def modify_export(did, eid):
   if e == None:
     abort(404)
 
+  suffix = '_modified'
+
+  headers = {
+    'Content-Type': 'application/xml',
+    'Content-Disposition': f'attachment;filename={e.path.stem}{suffix}.xml',
+  }
+
   changes = form_to_changes(request.form)
-  return generate_export(e.path, changes), {'Content-Type': 'application/xml'}
+  return generate_export(e.path, changes), headers
