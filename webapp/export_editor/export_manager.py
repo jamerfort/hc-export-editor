@@ -64,15 +64,8 @@ class Export:
 
 class ExportManager:
   def __init__(self, dirs=None, exports_glob="*.xml"):
-    if not dirs:
-      dirs = os.environ.get('EXPORT_DIRS', '')
+    dirs = self._find_dirs(dirs)
 
-    if isinstance(dirs, str):
-      # split on ":" in unix, ";" in windows
-      dirs = dirs.split(os.pathsep)
-
-    dirs = [Path(d) for d in dirs]
-    dirs = [d for d in dirs if self.is_valid_dir(d)]
     dirs = [
       Directory.from_path(p, exports_glob=exports_glob)
       for p in dirs
@@ -80,8 +73,35 @@ class ExportManager:
 
     self.dirs_by_id = {d.id: d for d in dirs}
 
+  @classmethod
+  def _find_dirs_exists(cls, dirs=None):
+    for p in cls._find_dirs(dirs):
+      if p.exists() and p.is_dir():
+        yield p
+
+  @classmethod
+  def _find_dirs(cls, dirs=None):
+
+    # dirs ######################################################
+    if dirs:
+      if isinstance(dirs, str):
+        # split on ":" in unix, ";" in windows
+        for d in dirs.split(os.pathsep):
+          yield Path(d)
+    
+    # iris ######################################################
+    try:
+      import iris
+
+      yield Path(iris.installdir) / 'exports'
+      yield Path(iris.installdir) / 'mgr' / 'exports'
+
+    except:
+      pass
+
+    # environment vars ##########################################
+    for d in os.environ.get('EXPORT_DIRS', '').split(os.pathsep):
+      yield Path(d)
+
   def dirs(self, sortkey="id"):
     return sorted(self.dirs_by_id.values(), key=lambda d: getattr(d, sortkey))
-
-  def is_valid_dir(self, d):
-    return d.is_dir()
