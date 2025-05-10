@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Export Editor</title>
-    <link href="/static/style.css" rel="stylesheet"/>
+    <link href="{{url_for('static', filename='style.css')}}" rel="stylesheet"/>
   </head>
   <body>
     <h1>Export Editor</h1>
 
     <div id="contents">
-      <form class="editor" action="{{export.link}}/modify" method="post" target="_blank">
+      <form class="editor" action="{{url_for('modify_export', did=dir.id, eid=export.id)}}" method="post" target="_blank">
 
         <div class="header">
           <div class="left">
             <h2 class="export">File Name: {{export.path.name}}</h2> 
-            <div class="dir">Directory: <a href="/exports">{{dir.path}}</a></div>
+            <div class="dir">Directory: <a href="{{url_for('exports')}}">{{dir.path}}</a></div>
           </div>
 
           <div class="generate">
@@ -115,7 +115,7 @@
       </form>
 
     </div> <!-- contents -->
-    <script src="/static/table_filters.js"></script>
+    <script src="{{url_for('static', filename='table_filters.js')}}"></script>
   </body>
 </html>
 
