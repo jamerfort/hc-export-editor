@@ -1,5 +1,5 @@
-from .export_details.interface import Interface
-from .export_details.lookup_table import Table
+from export_details.interface import Interface
+from export_details.lookup_table import Table
 
 from collections import OrderedDict
 from dataclasses import dataclass

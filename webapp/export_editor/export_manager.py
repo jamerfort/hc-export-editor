@@ -1,4 +1,4 @@
-from .export_details import ExportDetails
+from export_details import ExportDetails
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -64,7 +64,7 @@ class Export:
 
 class ExportManager:
   def __init__(self, dirs=None, exports_glob="*.xml"):
-    dirs = self._find_dirs(dirs)
+    dirs = self._find_dirs_exists(dirs)
 
     dirs = [
       Directory.from_path(p, exports_glob=exports_glob)
@@ -92,16 +92,18 @@ class ExportManager:
     # iris ######################################################
     try:
       import iris
+      iris_installdir = iris.system.Util.InstallDirectory()
 
-      yield Path(iris.installdir) / 'exports'
-      yield Path(iris.installdir) / 'mgr' / 'exports'
+      yield Path(iris_installdir) / 'exports'
+      yield Path(iris_installdir) / 'mgr' / 'exports'
 
     except:
       pass
 
     # environment vars ##########################################
     for d in os.environ.get('EXPORT_DIRS', '').split(os.pathsep):
-      yield Path(d)
+      if d != '':
+        yield Path(d)
 
   def dirs(self, sortkey="id"):
     return sorted(self.dirs_by_id.values(), key=lambda d: getattr(d, sortkey))

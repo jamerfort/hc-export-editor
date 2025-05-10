@@ -1,10 +1,10 @@
-from flask import Flask, render_template, abort, request, redirect
+from flask import Flask, render_template, abort, request, redirect, url_for
 
-from .export_manager import ExportManager
-from .export_generator import generate_export, form_to_changes
+import export_manager
+import export_generator
 
 app = Flask(__name__)
-manager = ExportManager()
+manager = export_manager.ExportManager()
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -14,7 +14,7 @@ def page_not_found(error):
 
 @app.route('/')
 def slash():
-  return redirect('/exports')
+  return redirect(url_for('exports'))
 
 @app.route("/exports")
 def exports():
@@ -71,5 +71,5 @@ def modify_export(did, eid):
     'Content-Disposition': f'attachment;filename={e.path.stem}{suffix}.xml',
   }
 
-  changes = form_to_changes(request.form)
-  return generate_export(e.path, changes), headers
+  changes = export_generator.form_to_changes(request.form)
+  return export_generator.generate_export(e.path, changes), headers
