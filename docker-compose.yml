@@ -1,0 +1,18 @@
+services:
+  iris:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 1972
+      - 55038:52773
+      - 53773
+      - 55030:5000
+    volumes:
+      - type: bind
+        source: ./webapps/hc_export_editor
+        target: /usr/irissys/lib/hc_export_editor
+      - type: bind
+        source: ./example_exports_dir
+        target: /usr/irissys/mgr/exports

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="hc-export-editor.ZPM">
+    <Module>
+      <Name>hc-export-editor</Name>
+      <Version>0.0.1</Version>
+      <Description>An InterSystems IRIS/Health Connect Production Export Editor</Description>
+      <Packaging>module</Packaging>
+      <SourcesRoot>src</SourcesRoot>
+      <FileCopy Name="webapps/hc_export_editor" Target="${libdir}hc_export_editor/"/>
+      <WebApplication
+        Url="/hc-export-editor"
+        AutheEnabled="32"
+        Description="An InterSystems IRIS/Health Connect Production Export Editor"
+        MatchRoles=":%SQL:%Developer,%Manager:%All"
+        NameSpace="${ns}"
+        WSGIAppLocation="${libdir}hc_export_editor/"
+        WSGIAppName="app"
+        WSGICallable="app"
+        DispatchClass="%SYS.Python.WSGI"
+      />
+    </Module>
+  </Document>
+</Export>
