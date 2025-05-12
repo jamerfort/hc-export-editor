@@ -84,11 +84,19 @@ class ExportManager:
 
   @classmethod
   def _find_dirs(cls, dirs=None):
+
+    # dirs ######################################################
+    if dirs:
+      if isinstance(dirs, str):
+        # split on ":" in unix, ";" in windows
+        for d in dirs.split(os.pathsep):
+          yield Path(d)
+
+        return
     
-    # iris ######################################################
+    # iris global ###############################################
     try:
       import iris
-      iris_installdir = iris.system.Util.InstallDirectory()
 
       # Check for global configuration
       config = iris.gref('^hc.export.editor.config')
@@ -100,25 +108,27 @@ class ExportManager:
           
           # Return here, as this overrides all other directory options
           return
-            
+    except:
+      pass
+
+    # environment vars ##########################################
+    envdirs = os.environ.get('EXPORT_DIRS', '')
+    if envdirs:
+      for d in envdirs.split(os.pathsep):
+        if d != '':
+          yield Path(d)
+      return
+    
+    # iris defaults #############################################
+    try:
+      import iris
+      iris_installdir = iris.system.Util.InstallDirectory()
 
       yield Path(iris_installdir) / 'exports'
       yield Path(iris_installdir) / 'mgr' / 'exports'
 
     except:
       pass
-
-    # dirs ######################################################
-    if dirs:
-      if isinstance(dirs, str):
-        # split on ":" in unix, ";" in windows
-        for d in dirs.split(os.pathsep):
-          yield Path(d)
-
-    # environment vars ##########################################
-    for d in os.environ.get('EXPORT_DIRS', '').split(os.pathsep):
-      if d != '':
-        yield Path(d)
 
   def dirs(self, sortkey="id"):
     return sorted(self.dirs_by_id.values(), key=lambda d: getattr(d, sortkey))
