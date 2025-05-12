@@ -16,6 +16,12 @@ def page_not_found(error):
 def slash():
   return redirect(url_for('exports'))
 
+@app.route('/reload')
+def reload():
+  manager.reload()
+  dirs = manager.dirs()
+  return render_template("exports.html", dirs=dirs, notify="Reloaded configuration...")
+
 @app.route("/exports")
 def exports():
   dirs = manager.dirs()

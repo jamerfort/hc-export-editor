@@ -64,6 +64,9 @@ class Export:
 
 class ExportManager:
   def __init__(self, dirs=None, exports_glob="*.xml"):
+    self.reload()
+
+  def reload(self, dirs=None, exports_glob="*.xml"):
     dirs = self._find_dirs_exists(dirs)
 
     dirs = [
@@ -81,6 +84,29 @@ class ExportManager:
 
   @classmethod
   def _find_dirs(cls, dirs=None):
+    
+    # iris ######################################################
+    try:
+      import iris
+      iris_installdir = iris.system.Util.InstallDirectory()
+
+      # Check for global configuration
+      config = iris.gref('^hc.export.editor.config')
+      if config.data(['dirs']):
+        dirs = config.get(['dirs']).strip()
+        if dirs:
+          for d in dirs.split(os.pathsep):
+            yield Path(d)
+          
+          # Return here, as this overrides all other directory options
+          return
+            
+
+      yield Path(iris_installdir) / 'exports'
+      yield Path(iris_installdir) / 'mgr' / 'exports'
+
+    except:
+      pass
 
     # dirs ######################################################
     if dirs:
@@ -88,17 +114,6 @@ class ExportManager:
         # split on ":" in unix, ";" in windows
         for d in dirs.split(os.pathsep):
           yield Path(d)
-    
-    # iris ######################################################
-    try:
-      import iris
-      iris_installdir = iris.system.Util.InstallDirectory()
-
-      yield Path(iris_installdir) / 'exports'
-      yield Path(iris_installdir) / 'mgr' / 'exports'
-
-    except:
-      pass
 
     # environment vars ##########################################
     for d in os.environ.get('EXPORT_DIRS', '').split(os.pathsep):

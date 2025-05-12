@@ -11,6 +11,10 @@
     <h1>Export Editor</h1>
 
     <div id="contents">
+      {% if notify %}
+      <div class="notify">{{notify}}</div>
+      {% endif %}
+
       <div id="directories">
         <h2>Export Directories</h2>
         {% for dir in dirs %}

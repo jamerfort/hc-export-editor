@@ -37,6 +37,11 @@ a:visited {
   border-bottom: 1px solid var(--color);
 }
 
+.notify {
+  border: 1px solid var(--bg);
+  background: var(--mute-color);
+}
+
 table {
   border: 1px solid var(--mute-color);
 }
@@ -100,6 +105,10 @@ table input {
   padding: 0;
   width: 100%;
   height: 2em;
+}
+
+.notify {
+  padding: 1em;
 }
 
 /* State/Animation Classes ***********************************/
