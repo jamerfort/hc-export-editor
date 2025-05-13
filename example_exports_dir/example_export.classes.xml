@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-13 06:38:49">
+<Class name="Ens.AlertRequest">
+<Copyright>/* Copyright (c) 2025 by InterSystems Corporation.
+   Cambridge, Massachusetts, U.S.A.  All rights reserved.
+   Confidential property of InterSystems Corporation. */</Copyright>
+<ClassType>persistent</ClassType>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>Ens.Request</Super>
+<System>4</System>
+<TimeChanged>67275,65007.867</TimeChanged>
+<TimeCreated>59310,24841.312</TimeCreated>
+
+<Property name="SourceConfigName">
+<Description>
+Name of the business host that is sending the alert</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="128"/>
+</Property>
+
+<Property name="AlertText">
+<Description>
+Text of the alert message</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="AlertDestination">
+<Description>
+Field for designating the external destination of this alert message</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="AlertTime">
+<Description>
+Time at which the alert was created.</Description>
+<Type>Ens.DataType.UTC</Type>
+<InitialExpression>$$$timeUTC</InitialExpression>
+</Property>
+
+<Property name="SessionId">
+<Description>
+The session in which the Alert occurred.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Method name="%OnNew">
+<FormalSpec>initvalue:%RawString</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set ..SourceConfigName=$lg($g(initvalue),1)
+	Set ..AlertText = $lg($g(initvalue),2)
+	Set ..AlertDestination = $lg($g(initvalue),3)
+	Set ..SessionId = $get($$$JobSessionId)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>AlertRequestDefaultData</DefaultData>
+<Data name="AlertRequestDefaultData">
+<Subscript>"AlertRequest"</Subscript>
+<Value name="1">
+<Value>AlertText</Value>
+</Value>
+<Value name="2">
+<Value>SourceConfigName</Value>
+</Value>
+<Value name="3">
+<Value>AlertDestination</Value>
+</Value>
+<Value name="4">
+<Value>AlertTime</Value>
+</Value>
+<Value name="5">
+<Value>SessionId</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

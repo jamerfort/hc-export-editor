@@ -52,6 +52,11 @@
             </table>
 
           </div> <!-- tocs -->
+          {% else %}
+          <div class="toc">
+            <h3>Contents</h3>
+            <div class="msg">No Table of Contents found.  Is this a Production Export?</div>
+          </div>
           {% endif %}
 
           {% if details.interfaces %}
