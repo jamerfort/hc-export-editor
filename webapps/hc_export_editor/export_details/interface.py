@@ -50,7 +50,7 @@ class Interface:
     empty_setting = Setting('', '', '')
 
     for ptd in tree.xpath('//Document[starts-with(@name, "Settings:")]/ProjectTextDocument'):
-      item = etree.fromstring(ptd.text)
+      item = cls._etree_fromstring(ptd.text)
       name = item.attrib['Name']
 
       attrs = [Attr(name, value) for name, value in item.attrib.items()]
@@ -62,9 +62,19 @@ class Interface:
       yield Interface(name, attrs_dict, settings_dict)
 
   @classmethod
+  def _etree_fromstring(cls, text):
+    try:
+      item = etree.fromstring(text)
+    except etree.XMLSyntaxError as e:
+      if 'CData section not finished' in e.msg:
+        return etree.fromstring(text.replace(']*]', ']]'))
+
+    return item
+
+  @classmethod
   def apply_changes(cls, tree, changes):
     for ptd in tree.xpath('//Document[starts-with(@name, "Settings:")]/ProjectTextDocument'):
-      item = etree.fromstring(ptd.text)
+      item = cls._etree_fromstring(ptd.text)
       modified = False
       name = item.attrib['Name']
 
