@@ -1,5 +1,6 @@
 from export_details import ExportDetails
 from dataclasses import dataclass
+import datetime
 import os
 from pathlib import Path
 
@@ -41,13 +42,16 @@ class Export:
   path: str
   inode: int
   link: str
+  date_modified: str = ''
 
   @classmethod
   def from_path(cls, path, linkbase):
-    inode = path.stat().st_ino
+    stat = path.stat()
+    inode = stat.st_ino
     id = str(inode)
     link = f'{linkbase}/{id}'
-    return Export(id, path, inode, link)
+    date_modified = datetime.datetime.fromtimestamp(stat.st_mtime)
+    return Export(id, path, inode, link, date_modified)
 
   def is_valid(self):
     if self.path.is_dir():

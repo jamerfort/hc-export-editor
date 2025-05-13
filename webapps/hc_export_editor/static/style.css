@@ -109,6 +109,7 @@ table input {
 
 .notify {
   padding: 1em;
+  margin-bottom: 1em;
 }
 
 /* State/Animation Classes ***********************************/
@@ -157,6 +158,10 @@ h1 {
       margin: 0;
     }
 
+  .header input {
+    margin: 0;
+  }
+
   .header .generate {}
 
     .header .generate input {
@@ -173,7 +178,10 @@ h1 {
   padding: 1em;
 }
 
+  h2 ,
+  h3 ,
   .main h3 {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;

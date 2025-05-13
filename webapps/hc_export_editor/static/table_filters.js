@@ -48,7 +48,7 @@ document.querySelectorAll('input.filter').forEach(input => {
   const table_sel = input.dataset.tableSelector;
   if (!table_sel) { return; }
 
-  const main = input.closest('.main');
+  const main = input.closest('.main') || document.querySelectorAll('.main')[0];
   if (!main) { return; }
 
   const tables = [...main.querySelectorAll(table_sel)];
