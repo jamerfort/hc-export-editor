@@ -1,7 +1,7 @@
 # hc-export-editor
 An InterSystems IRIS/Health Connect Production Export Editor
 
-![Modify Export](./docs/images/export_editor.png)
+![Image: Modify Export](./docs/images/export_editor.png)
 
 Have you ever needed to change an IP or port before deploying an interface to production?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?
 
@@ -85,7 +85,7 @@ docker compose down
 
 ### Option 3: Install the IPM/ZPM package 
 
-Once the package is approved for ZPM, use `zpm` install the `hc-export-editor` package:
+Once the package is approved for ZPM, use `zpm` to install the `hc-export-editor` package:
 ```cls
 USER>zpm
 
@@ -101,6 +101,12 @@ First, download/clone the repo:
 
 ```bash
 git clone https://github.com/jamerfort/hc-export-editor.git
+```
+
+Install the required python modules:
+
+```bash
+python3 -m pip install --target /InterSystems/IRIS/mgr/python -r hc-export-editor/requirements.txt
 ```
 
 Navigate to `System Adminstration > Security > Applications >  Web Applications` in IRIS/Health Connect. Click `Create New Web Application`.
@@ -148,12 +154,12 @@ Once you've made a change to either the global or environment variable, be sure 
 ### Listing Exports
 The `/hc-export-editor/exports` page lists all of the XML files found in the configured directories.  Click on an export to modify.
 
-![List Exports](./docs/images/exports.png)
+![Image: List Exports](./docs/images/exports.png)
 
 ### Modifying an Export
 The `/hc-export-editor/exports/<dir-id>/<file-id>` page allows you to modify the given XML export file.
 
-![Modify Export](./docs/images/modify1.png)
+![Image: Modify Export](./docs/images/modify1.png)
 
 This page contains various sections, each with its own table and filter box.
 
@@ -164,34 +170,34 @@ Most tables have a `New Value` column that is editable.  Changing the values in 
 #### Header Section
 This section contains the file name of the export being modified and the directory that contains the export.
 
-![Modify Export - Header](./docs/images/header.png)
+![Image: Modify Export - Header](./docs/images/header.png)
 
 The `Directory` link will take you back to the `hc-export-editor/exports` page, that lists all the configured directories and their contents.
 
 #### "Contents" Section
 This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can not currently edit the list of items in the export.
 
-![Modify Export - Contents](./docs/images/contents.png)
+![Image: Modify Export - Contents](./docs/images/contents.png)
 
 #### "Interface Settings" Section
 This section of the editor allows you to edit the various settings and attributes of any interfaces (Business Services, Processes, or Operations) included in the export.
 
-![Modify Export - Interface Settings](./docs/images/interface_settings.png)
+![Image: Modify Export - Interface Settings](./docs/images/interface_settings.png)
 
 You can use the filter box to the top-right to narrow down the list of displayed settings.  For example, if you type "port", the "Interface Settings" table will only show settings with "port" in the name.
 
-![Modify Export - Port Filtering](./docs/images/ports.png)
+![Image: Modify Export - Port Filtering](./docs/images/ports.png)
 
 #### "Lookup Tables" Section
 This section of the editor allows you to edit the values of any lookup tables included in the export.
 
 You can use the filter box to the top-right to narrow down the list of displayed rows.
 
-![Modify Export - Lookup Tables](./docs/images/lookup_tables.png)
+![Image: Modify Export - Lookup Tables](./docs/images/lookup_tables.png)
 
 #### Saving the Changes
 After you've made changes to the settings in the tables above, you can either type `Enter` (while in an text box or editable field) or you can click the `Generate Modified Export` button at the top-right of the page.
 
-![Modify Export - Generate Button](./docs/images/generate_button.png)
+![Image: Modify Export - Generate Button](./docs/images/generate_button.png)
 
 Submitting the page (by hitting `Enter` or the `Generate Modified Export` button) will prompt your browser to download an XML file.  This XML export should contain your modifications and be ready to deploy to your environment.
