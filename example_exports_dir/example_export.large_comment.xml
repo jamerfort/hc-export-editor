@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-12 22:22:57">
+<Project name="EnsExportItem_2025-05-06 04-55-38_525+0" LastModified="2025-05-12 22:22:57.927215831">
+  <ProjectDescription><![CDATA[Studio Project generated starting from Production Configuration Item &apos;USER.NewProduction : operation1&apos; at 2025-05-06 04:55:38.525 UTC]]></ProjectDescription>
+  <Items>
+    <ProjectItem name="USER.ExampleTable.LUT" type="LUT"></ProjectItem>
+    <ProjectItem name="Settings:operation1.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:operation2.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:operation3.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportItem_2025-05-06 04-55-38_525+0.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Document name="EnsExportNotes.EnsExportItem_2025-05-06 04-55-38_525+0.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportItem_2025-05-06 04-55-38_525+0" description="Export Notes for export EnsExportItem_2025-05-06 04-55-38_525+0">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>C9DF04FC78AD</Machine>
+<Instance>IRIS</Instance>
+<Namespace>IRISAPP</Namespace>
+<SourceProduction>USER.NewProduction</SourceProduction>
+<Username>SuperUser</Username>
+<UTC>2025-05-12 22:22:57.924</UTC>
+</Creation>
+<Notes>
+</Notes>
+<Contents>
+<ExportProject>EnsExportItem_2025-05-06 04-55-38_525+0</ExportProject>
+<Item num="1">Settings:operation1.PTD</Item>
+<Item num="2">Settings:operation2.PTD</Item>
+<Item num="3">Settings:operation3.PTD</Item>
+<Item num="4">USER.ExampleTable.LUT</Item>
+</Contents>
+<ProductionClassInExport></ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:operation1.PTD"><ProjectTextDocument name="Settings:operation1" description="Settings for operation1 in Production USER.NewProduction">
+<![CDATA[<Item Name="operation1" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="orem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="HTTPPort">11234</Setting><Setting Target="Adapter" Name="HTTPServer">localhost</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:operation2.PTD"><ProjectTextDocument name="Settings:operation2" description="Settings for operation2 in Production USER.NewProduction">
+<![CDATA[<Item Name="operation2" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="HTTPPort">11235</Setting><Setting Target="Adapter" Name="HTTPServer">localhost</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:operation3.PTD"><ProjectTextDocument name="Settings:operation3" description="Settings for operation3 in Production USER.NewProduction">
+<![CDATA[<Item Name="operation3" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="HTTPPort">11236</Setting><Setting Target="Adapter" Name="HTTPServer">localhost</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="USER.ExampleTable.LUT">
+<lookupTable>
+<entry table="USER.ExampleTable" key="key1">value1</entry>
+<entry table="USER.ExampleTable" key="key2">value2</entry>
+<entry table="USER.ExampleTable" key="key3">value3</entry>
+</lookupTable>
+</Document></Export>
