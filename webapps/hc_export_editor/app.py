@@ -22,6 +22,7 @@ def reload():
   dirs = manager.dirs()
   return render_template("exports.html", dirs=dirs, notify="Reloaded configuration...")
 
+@app.route("/exports/")
 @app.route("/exports")
 def exports():
   dirs = manager.dirs()
@@ -79,3 +80,7 @@ def modify_export(did, eid):
 
   changes = export_generator.form_to_changes(request.form)
   return export_generator.generate_export(e.path, changes), headers
+
+@app.route('/help')
+def help():
+  return render_template("help.html")

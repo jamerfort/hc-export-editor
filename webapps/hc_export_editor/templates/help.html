@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Help{% endblock %}
+{% block body %}
+<div class="help">
+<h1>hc-export-editor</h1>
+<p>An InterSystems IRIS/Health Connect Production Export Editor</p>
+<p><img src="{{url_for('static', filename='./docs/images/export_editor.png')}}" alt="Image: Modify Export" /></p>
+<p>Have you ever needed to change an IP or port before deploying an interface to production?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?</p>
+<p>If you've ever needed to make any changes to an interface or lookup table before deploying to production, this <code>Export Editor</code> is for you!</p>
+<h3>InterSystems FHIR and Digital Health Interoperability Contest 2025</h3>
+<p>This library was originally created/published for the <a href="https://community.intersystems.com/post/intersystems-fhir-and-digital-health-interoperability-contest-2025">InterSystems FHIR and Digital Health Interoperability Contest 2025</a>.</p>
+<h2>Description</h2>
+<p><code>Export Editor</code> is a WSGI web application that provides a method for editing exports before deploying them to an IRIS/Health Connect production.</p>
+<p>This tool allows you to:</p>
+<ul>
+<li>change any setting on an interface (whether a Business Service, Process, or Operation)</li>
+<li>modify any value in a lookup table.</li>
+</ul>
+<h2>Prerequisites</h2>
+<ul>
+<li>IRIS 2022.1+ (for Embedded Python support)</li>
+<li>Python 3 installed on the system</li>
+</ul>
+<h2>Installation</h2>
+<p>There are several methods for installing this library:</p>
+<ol>
+<li>Run the application directly by python.</li>
+<li>Docker</li>
+<li>Install the IPM/ZPM package</li>
+<li>Manually Install as an IRIS WSGI application</li>
+</ol>
+<h3>Option 1: Run the application directly by python.</h3>
+<p>Clone the repository:</p>
+<pre><code class="language-bash">git clone https://github.com/jamerfort/hc-export-editor.git
+</code></pre>
+<p>Navigate to the <code>hc_export_editor</code> directory:</p>
+<pre><code class="language-bash">cd hc_export_editor
+</code></pre>
+<p>Before you run the application, you must setup all dependencies (venv, python packages, etc.):</p>
+<pre><code class="language-bash">./setup.sh
+</code></pre>
+<p>To run the development server provided with python/flask:</p>
+<pre><code class="language-bash">./run.sh
+# Or
+./run.sh -h &lt;IPADDRESS&gt; -p &lt;PORT&gt;
+</code></pre>
+<p>Now open a browser and navigate to http://localhost:5000 (or whichever host/port you used).</p>
+<h3>Option 2: Docker</h3>
+<p>If you prefer, you can demo <code>Export Editor</code> with docker.</p>
+<p>First, download/clone the repo to your local computer:</p>
+<pre><code class="language-bash">git clone https://github.com/jamerfort/hc-export-editor.git
+</code></pre>
+<p>Build and connect to your instance:</p>
+<pre><code class="language-bash">cd ./hc-export-editor
+
+# Rebuild/start the image
+docker compose up --build -d
+</code></pre>
+<p>Access the demo at http://localhost:55038/hc-export-editor/exports.</p>
+<p>Stop your instance:</p>
+<pre><code class="language-bash"># Stop your containers
+docker compose down 
+</code></pre>
+<h3>Option 3: Install the IPM/ZPM package</h3>
+<p>Once the package is approved for ZPM, use <code>zpm</code> to install the <code>hc-export-editor</code> package:</p>
+<pre><code class="language-cls">USER&gt;zpm
+
+=============================================================================
+|| Welcome to the Package Manager Shell (ZPM). version 0.7.4               ||
+|| Enter q/quit to exit the shell. Enter ?/help to view available commands ||
+|| Current registry https://pm.community.intersystems.com                  ||
+=============================================================================
+zpm:USER&gt;install hc-export-editor
+</code></pre>
+<h3>Option 4: Manually Install as an IRIS WSGI application</h3>
+<p>First, download/clone the repo:</p>
+<pre><code class="language-bash">git clone https://github.com/jamerfort/hc-export-editor.git
+</code></pre>
+<p>Install the required python modules:</p>
+<pre><code class="language-bash">python3 -m pip install --target /InterSystems/IRIS/mgr/python -r hc-export-editor/requirements.txt
+</code></pre>
+<p>Navigate to <code>System Adminstration &gt; Security &gt; Applications &gt;  Web Applications</code> in IRIS/Health Connect. Click <code>Create New Web Application</code>.</p>
+<p>Fill in the following fields:</p>
+<blockquote>
+<p><strong>Name</strong>: /hc-export-editor<br />
+<strong>Description</strong>: An InterSystems IRIS/Health Connect Production Export Editor<br />
+<strong>Namespace</strong>: [Your Desired Namespace]<br />
+<strong>Enable Application</strong>: ✓ [Checked]</p>
+<p><strong>WSGI [Experimental]</strong>: ✓ [Checked]</p>
+<blockquote>
+<p><strong>Application Name</strong>: app<br />
+<strong>Callable Name</strong>: app<br />
+<strong>WSGI App Directory</strong>: /path/to/hc-export-editor/webapps/hc_export_editor</p>
+</blockquote>
+<p><strong>Security Settings</strong>:</p>
+<blockquote>
+<p><strong>Allowed Authentication Methods</strong>: [Choose appropriate auth methods, such as &quot;Password&quot;]</p>
+</blockquote>
+</blockquote>
+<p>Set any additional parameters as desired.</p>
+<p>Click <code>Save</code> button.</p>
+<h2>Configuration</h2>
+<p>By default, <code>Export Editor</code> looks in the following directories for any xml files:</p>
+<ul>
+<li>{IRIS_INSTALLDIR}/exports</li>
+<li>{IRIS_INSTALLDIR}/mgr/exports</li>
+</ul>
+<p>If you would like to customize which directories <code>Export Editor</code> will manage, you can either update the <code>EXPORT_DIRS</code> environment variable or edit the <code>^hc.export.editor.config(&quot;dirs&quot;)</code> global in the namespace running the application.  The values of this environment variable or global is a list of directories, separated by the OS path separator (semi-colon (<code>;</code>) on Windows, colon (<code>:</code>) on Unix/Linux/Posix).</p>
+<p>For example:</p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th>Sep</th>
+<th>Method</th>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>;</td>
+<td>Environment Variable</td>
+<td><code>EXPORT_DIRS</code></td>
+<td><code>C:\path\to\exports1;D:\another\path\to\exports</code></td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>;</td>
+<td>Global</td>
+<td><code>^hc.export.editor.config(&quot;dirs&quot;)</code></td>
+<td><code>C:\path\to\exports1;D:\another\path\to\exports</code></td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>:</td>
+<td>Environment Variable</td>
+<td><code>EXPORT_DIRS</code></td>
+<td><code>/path/to/exports1:/another/path/to/exports</code></td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>:</td>
+<td>Global</td>
+<td><code>^hc.export.editor.config(&quot;dirs&quot;)</code></td>
+<td><code>/path/to/exports1:/another/path/to/exports</code></td>
+</tr>
+</tbody>
+</table>
+<p>Setting the <code>^hc.export.editor.config(&quot;dirs&quot;)</code> global takes precedence over the <code>EXPORT_DIRS</code> environment variable.  If either are set, <code>Export Editor</code> will <em>NOT</em> look in the default directories found under <code>{IRIS_INSTALLDIR}</code>.</p>
+<p>Once you've made a change to either the global or environment variable, be sure to either restart your instance or visit the <code>/hc-export-editor/reload</code> endpoint to trigger a configuration reload.</p>
+<h2>Usage</h2>
+<h3>Listing Exports</h3>
+<p>The <code>/hc-export-editor/exports</code> page lists all of the XML files found in the configured directories.  Click on an export to modify.</p>
+<p><img src="{{url_for('static', filename='./docs/images/exports.png')}}" alt="Image: List Exports" /></p>
+<h3>Modifying an Export</h3>
+<p>The <code>/hc-export-editor/exports/&lt;dir-id&gt;/&lt;file-id&gt;</code> page allows you to modify the given XML export file.</p>
+<p><img src="{{url_for('static', filename='./docs/images/modify1.png')}}" alt="Image: Modify Export" /></p>
+<p>This page contains various sections, each with its own table and filter box.</p>
+<p>The filter box allows you to narrow down the display to only the rows you are interested in viewing or editing.</p>
+<p>Most tables have a <code>New Value</code> column that is editable.  Changing the values in this column will change the corresponding value in the generated, modified export.  Use the <code>tab</code> key to jump from editable cell to editable cell.</p>
+<h4>Header Section</h4>
+<p>This section contains the file name of the export being modified and the directory that contains the export.</p>
+<p><img src="{{url_for('static', filename='./docs/images/header.png')}}" alt="Image: Modify Export - Header" /></p>
+<p>The <code>Directory</code> link will take you back to the <code>hc-export-editor/exports</code> page, that lists all the configured directories and their contents.</p>
+<h4>&quot;Contents&quot; Section</h4>
+<p>This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can not currently edit the list of items in the export.</p>
+<p><img src="{{url_for('static', filename='./docs/images/contents.png')}}" alt="Image: Modify Export - Contents" /></p>
+<h4>&quot;Interface Settings&quot; Section</h4>
+<p>This section of the editor allows you to edit the various settings and attributes of any interfaces (Business Services, Processes, or Operations) included in the export.</p>
+<p><img src="{{url_for('static', filename='./docs/images/interface_settings.png')}}" alt="Image: Modify Export - Interface Settings" /></p>
+<p>You can use the filter box to the top-right to narrow down the list of displayed settings.  For example, if you type &quot;port&quot;, the &quot;Interface Settings&quot; table will only show settings with &quot;port&quot; in the name.</p>
+<p><img src="{{url_for('static', filename='./docs/images/ports.png')}}" alt="Image: Modify Export - Port Filtering" /></p>
+<h4>&quot;Lookup Tables&quot; Section</h4>
+<p>This section of the editor allows you to edit the values of any lookup tables included in the export.</p>
+<p>You can use the filter box to the top-right to narrow down the list of displayed rows.</p>
+<p><img src="{{url_for('static', filename='./docs/images/lookup_tables.png')}}" alt="Image: Modify Export - Lookup Tables" /></p>
+<h4>Saving the Changes</h4>
+<p>After you've made changes to the settings in the tables above, you can either type <code>Enter</code> (while in an text box or editable field) or you can click the <code>Generate Modified Export</code> button at the top-right of the page.</p>
+<p><img src="{{url_for('static', filename='./docs/images/generate_button.png')}}" alt="Image: Modify Export - Generate Button" /></p>
+<p>Submitting the page (by hitting <code>Enter</code> or the <code>Generate Modified Export</code> button) will prompt your browser to download an XML file.  This XML export should contain your modifications and be ready to deploy to your environment.</p>
+</div>
+{% endblock %}

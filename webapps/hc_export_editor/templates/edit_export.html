@@ -14,6 +14,7 @@
     <div id="contents">
       <form class="editor stretch" action="{{url_for('modify_export', did=dir.id, eid=export.id)}}" method="post" target="_blank">
 
+        <!------------------------------------------------------------------------>
         <div class="header">
           <div class="left">
             <h2 class="export">File Name: {{export.path.name}}</h2> 
@@ -25,6 +26,7 @@
           </div>
         </div> <!-- header -->
 
+        <!------------------------------------------------------------------------>
         <div class="main">
           {% if details.toc %}
           <div class="toc">
@@ -146,6 +148,13 @@
           </div> <!-- tables -->
           {% endif %}
         </div> <!-- main -->
+
+        <!------------------------------------------------------------------------>
+        <div class="footer">
+          <span><a href="{{url_for('exports')}}">Home</a></span>
+          <span><a href="{{url_for('help')}}">Help</a></span>
+          <span><a href="{{url_for('reload')}}">Reload</a></span>
+        </div>
       </form>
 
     </div> <!-- contents -->

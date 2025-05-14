@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Export Editor</title>
+    <title>Export Editor - {% block title %}{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{url_for('static', filename='hc-export-editor.png')}}"/>
     <link href="{{url_for('static', filename='style.css')}}" rel="stylesheet"/>
   </head>
@@ -21,49 +21,14 @@
         <!------------------------------------------------------------------------>
         <div class="header">
           <div class="left">
-            <h2>
-              <span>Export Directories</span>
-            </h2>
-          </div>
-
-          <div class="right">
-              <input type="text" data-table-selector=".exports-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
+            <h2>{{ self.title() }}</h2>
           </div>
         </div> <!-- header -->
 
         <!------------------------------------------------------------------------>
         <div class="main">
 
-          <div id="directories">
-
-            {% for dir in dirs %}
-            <div class="dir">
-              <h3>
-                {{dir.path}}
-              </h3>
-
-              <table class="exports-table">
-                <thead>
-                  <tr>
-                    <th>Export</th>
-                    <th>Date Modified</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                {% for export in dir.exports() %}
-                  <tr>
-                    <td><a href="{{url_for('edit_export', did=dir.id, eid=export.id)}}">{{export.path.name}}</a></td>
-                    <td>{{export.date_modified}}</td>
-                  </tr>
-                {% endfor %}
-
-                </tbody>
-              </table>
-
-            </div>
-            {% endfor %}
-          </div><!-- directories -->
+        {% block body %}{% endblock %}
 
         </div><!-- main -->
 
