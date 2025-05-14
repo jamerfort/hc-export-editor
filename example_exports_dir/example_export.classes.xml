@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-13 06:38:49">
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-14 06:59:38">
 <Class name="Ens.AlertRequest">
 <Copyright>/* Copyright (c) 2025 by InterSystems Corporation.
    Cambridge, Massachusetts, U.S.A.  All rights reserved.
@@ -77,6 +77,1409 @@ The session in which the Alert occurred.</Description>
 </Value>
 <Value name="5">
 <Value>SessionId</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="Ens.MessageHeader">
+<Copyright>/* Copyright (c) 2025 by InterSystems Corporation.
+   Cambridge, Massachusetts, U.S.A.  All rights reserved.
+   Confidential property of InterSystems Corporation. */</Copyright>
+<CompileAfter>Ens.SuperSessionIndex</CompileAfter>
+<IncludeCode>Ensemble</IncludeCode>
+<IncludeGenerator>%occInclude</IncludeGenerator>
+<Super>%Persistent,Ens.MessageHeaderBase,%XML.Adaptor</Super>
+<System>4</System>
+<TimeChanged>67275,65008.209</TimeChanged>
+<TimeCreated>59262,38857.143</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>20000000</Default>
+</Parameter>
+
+<Index name="Extent">
+<Type>bitmap</Type>
+<Extent>1</Extent>
+</Index>
+
+<Index name="TimeCreated">
+<Properties>TimeCreated</Properties>
+</Index>
+
+<Index name="Status">
+<Type>bitmap</Type>
+<Properties>Status</Properties>
+</Index>
+
+<Index name="SourceConfigName">
+<Type>bitmap</Type>
+<Properties>SourceConfigName</Properties>
+</Index>
+
+<Index name="TargetConfigName">
+<Type>bitmap</Type>
+<Properties>TargetConfigName</Properties>
+</Index>
+
+<Index name="SessionId">
+<Properties>SessionId</Properties>
+</Index>
+
+<Index name="MessageBodyClassName">
+<Type>bitmap</Type>
+<Properties>MessageBodyClassName</Properties>
+</Index>
+
+<Index name="MessageBodyId">
+<Properties>MessageBodyId</Properties>
+</Index>
+
+<Property name="Banked">
+<Description><![CDATA[
+<example>
+Enterprise Message Bank status of:
+  this header,
+  its MessageBody,
+  possible SearchTable.
+
+Possible values:
+  0, 8 or #:#:DateTime
+where:
+  0 banking not requested
+  8 is banking requested
+  #:#:DateTime is:
+    First # indicates what has been banked:
+      Sum of 8 and a combination of Header=1, Body=2, SearchTable=4
+    Second #:
+      Last Message Header Status value
+    DateTime:
+      Last Message Header TimeProcessed value
+</example>]]></Description>
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Banked}=$S(""={ID}:"",1:$G(^Ens.MsgBank.Banked({ID}),0)) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Transient>1</Transient>
+<ReadOnly>1</ReadOnly>
+<Parameter name="XMLPROJECTION" value="NONE"/>
+</Property>
+
+<Method name="BankedGet">
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[	Set tID=..%Id()  Quit:""=tID ""  Quit $G(^Ens.MsgBank.Banked(tID),0)
+]]></Implementation>
+</Method>
+
+<Method name="NewRequestMessage">
+<Description>
+Create a new request header</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&pHeader:Ens.MessageHeader,pMessageBody:%Library.Persistent,&pSessionId:%String,&pSuperSession:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC=$$$OK
+	If $IsObject(pMessageBody) {
+		Set:pMessageBody.%IsA("%Library.Persistent")||pMessageBody.%IsA("%Stream.Object") tSC=pMessageBody.%Save()
+		Set:$$$ISOK(tSC) tSC=pMessageBody.%GetSwizzleObject(0,.tOID)
+		If $$$ISERR(tSC) $$$LOGSTATUS(tSC)  Set pHeader=$$$NULLOREF  Quit tSC
+	}
+	Set:'$$$IsdefObject(pHeader)||(""'=pHeader.TimeCreated) pHeader = ##class(Ens.MessageHeader).%New()  $$$ASSERT($IsObject(pHeader))
+	Set pHeader.TimeCreated = $$$timeUTC
+	Set pHeader.Type = $$$eMessageTypeRequest
+	Set pHeader.Priority = $$$eMessagePriorityAsync
+	Set pHeader.CorrespondingMessageId = ""
+	If $G(pSessionId)="" Set pSessionId=pHeader.MessageId()
+	Set pHeader.SessionId = pSessionId
+	If $G(pSuperSession)'="" Set pHeader.SuperSession = pSuperSession
+	If '$IsObject(pMessageBody) {
+		Set pHeader.MessageBodyClassName=""
+		Set pHeader.MessageBodyId=pMessageBody
+	} Else {
+		Set pHeader.MessageBodyClassName=$classname(pMessageBody)
+		Set pHeader.MessageBodyId=$$$oidPrimary(tOID)
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="NewResponseMessage">
+<Description>
+Create a response message header from a request message header</Description>
+<FormalSpec>*pHeader:Ens.MessageHeader,pMessageBody:%Library.Persistent,pSuperSession:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC=$$$OK
+	#dim tSaveThis As %Boolean = 0
+	If $IsObject(pMessageBody) {
+		Set:pMessageBody.%IsA("%Library.Persistent")||pMessageBody.%IsA("%Stream.Object") tSC=pMessageBody.%Save()
+		Set:$$$ISOK(tSC) tSC=pMessageBody.%GetSwizzleObject(0,.tOID)
+		If $$$ISERR(tSC) $$$LOGSTATUS(tSC)  Quit ..NewErrorResponse(.pHeader,tSC)
+	}
+	Set pHeader = ##class(Ens.MessageHeader).%New()  $$$ASSERT($IsObject(pHeader))
+	Set pHeader.TimeCreated = $$$timeUTC
+	Set pHeader.Type = $$$eMessageTypeResponse
+	Set pHeader.SourceConfigName = ..TargetConfigName
+	Set pHeader.TargetConfigName = ..SourceConfigName
+	Set pHeader.SourceBusinessType = ..TargetBusinessType
+	Set pHeader.TargetBusinessType = ..SourceBusinessType
+	Set pHeader.BusinessProcessId = ..BusinessProcessId
+	Set pHeader.Priority = ..Priority
+	Set pHeader.Invocation = ..Invocation
+	Set pHeader.TargetQueueName = ..ReturnQueueName
+	Set pHeader.ReturnQueueName = ""
+	Set pHeader.SessionId = ..SessionId
+
+	#; If SuperSession generated after request received update.
+	If (..SuperSession="") && (pSuperSession'="") Set ..SuperSession = pSuperSession, tSaveThis = 1     
+	Set pHeader.SuperSession = ..SuperSession
+
+	If pHeader.TargetQueueName'="" {
+		Set pHeader.CorrespondingMessageId = ..MessageId()
+		Set ..CorrespondingMessageId = pHeader.MessageId(), tSaveThis = 1
+	}
+
+	If tSaveThis {Set tSC = ..%Save()  $$$ASSERT(tSC=$$$OK)}
+
+	If '$IsObject(pMessageBody) {
+		Set pHeader.MessageBodyClassName=""
+		Set pHeader.MessageBodyId=pMessageBody
+	} Else {
+		Set pHeader.MessageBodyClassName=$classname(pMessageBody)
+		Set pHeader.MessageBodyId=$$$oidPrimary(tOID)
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="NewErrorResponse">
+<Description>
+creates an error message response header from a request message header</Description>
+<FormalSpec>*pHeader:Ens.MessageHeader,pStatus:%Status</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC = ..NewResponseMessage(.pHeader,$$$NULLOREF)  Quit:$$$ISERR(tSC) tSC
+	Set pHeader.IsError=1
+	Set pHeader.ErrorStatus=pStatus
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetStatus">
+<Description>
+set and immediately save the status field of this object</Description>
+<FormalSpec>pStatus:Ens.DataType.MessageStatus</FormalSpec>
+<Implementation><![CDATA[
+	Set tTimeUtc=$$$timeUTC
+	#; no need to update or queue for optional archiving if nothing changed
+	If (..Status=pStatus)&&(..TimeProcessed=tTimeUtc) Return
+
+	New %tId, %tStatus, %tTimeUtc  Set %tId=..%Id(), %tStatus=pStatus, %tTimeUtc=tTimeUtc
+	#; Note: SetStatus is called from Ens.Director:moveEnsRuntimeToEnsSuspended() inside a transaction hence check for SkipTLevelCheck
+	If $TLevel>0&&'$G($$$EnsJobLocal("SkipTLevelCheck")) Set tTL=$TLevel  While $TLevel>0 { TCommit } $$$LOGWARNING(tTL_" open user transaction"_$S(tTL>1:"s",1:"")_" found; committing before SetStatus("_%tId_")")
+	&sql(UPDATE Ens.MessageHeader Set Status = :%tStatus, TimeProcessed = :%tTimeUtc where %ID = :%tId)
+	If 'SQLCODE {
+		Set ..Status=%tStatus, ..TimeProcessed=%tTimeUtc
+		#; Bank the status change if we're configured for banking headers, or if this header was previously banked and needs its status updated
+		#; (Bank other stuff too if we're configured for it)
+		Set tFlags=$$$DoArchive,tBank=0
+		If ('tFlags&&(0'=tFlags))||(tFlags&&'$$$AND(tFlags,$$$eMsgBankHeader)) {
+			Set tBanked=..BankedGet()
+			If $$$AND(tBanked,$$$eMsgBankHeader) { Set tFlags=tFlags+$$$eMsgBankHeader }
+			ElseIf $$$AND(tBanked,$$$eMsgBankFlagged) { Set tBank=1 If 'tFlags Set tFlags="" } // Ensure we clear tFlags if Banking
+		}
+		If tFlags {
+			If '$D(tBanked) Set tBanked=..BankedGet()
+			If '$$$AND(tBanked,$$$eMsgBankFlagged) Set ^(%tId)=tBanked+$$$eMsgBankFlagged
+		}
+		Do:tFlags||tBank ##class(Ens.Queue).EnQueueId(tFlags_"_"_$Case($$$JobConfigName,..SourceConfigName:1,..TargetConfigName:2,"":0,:3)_"_"_%tId,"Ens.Enterprise.MsgBankOperation")
+	}
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	#dim tFlags As %String
+	Set tFlags=$$$DoArchive  If tFlags {Set:'..Banked ^Ens.MsgBank.Banked(..%Id())=$$$eMsgBankFlagged  Do ##class(Ens.Queue).EnQueueId(tFlags_"_"_$Case($$$JobConfigName,..SourceConfigName:1,..TargetConfigName:2,"":0,:3)_"_"_..%Id(),"Ens.Enterprise.MsgBankOperation")}
+
+	/* 
+		Update the SuperSession Index table.
+		This index table is used for viewing messages by Super Session.
+		If there is an error we do not want to abort saving the message header.
+		Account for SuperSession changing after initial insert.
+	*/
+	If ..SuperSession '= "" {
+		Try {
+			#dim tSuperSessionIndex As Ens.SuperSessionIndex = $$$NULLOREF
+			If insert {
+				Set tSuperSessionIndex = ##class(Ens.SuperSessionIndex).%New()
+				Set tSuperSessionIndex.MessageHeader = $this
+				Set tSuperSessionIndex.SuperSession = ..SuperSession
+			} Else {
+				/* look to find if have a SuperSession Index already saved and if different */
+				#dim tHeaderId As %String = ..%Id()
+				&sql(SELECT SuperSession, ID INTO :tPreviousSuperSession, :tSuperSessionIndexID FROM Ens.SuperSessionIndex WHERE MessageHeader = :tHeaderId)
+				If SQLCODE = 100 {
+					Set tSuperSessionIndex = ##class(Ens.SuperSessionIndex).%New()
+					Set tSuperSessionIndex.MessageHeader = $this
+					Set tSuperSessionIndex.SuperSession = ..SuperSession
+				} ElseIf 'SQLCODE {
+					If tPreviousSuperSession'=..SuperSession {
+						#dim tSC As %Status = $$$OK
+						Set tSuperSessionIndex = ##class(Ens.SuperSessionIndex).%OpenId(tSuperSessionIndexID,,.tSC)
+						If $$$ISOK(tSC) {
+							Set tSuperSessionIndex.SuperSession = ..SuperSession
+						} Else {
+							Quit
+						}
+					} Else {
+						Quit
+					}
+				}
+			}
+			Do tSuperSessionIndex.%Save()
+		} Catch {}
+	}
+
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MessageId">
+<Description>
+The same as %Id(), but works even if the object hasn't been saved already</Description>
+<CodeMode>generator</CodeMode>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	$$$GENERATE(" If ..%Id()="""" Do ..%IdSet($increment("_$$$EXTidlocation($$$pEXT,%class)_"))")
+	$$$GENERATE(" Quit ..%Id()")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ResendMessage">
+<Description>
+Deprecated - use ResendDuplicatedMessage() or ResubmitMessage()</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>pHeaderId:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[..ResubmitMessage(.pHeaderId)
+]]></Implementation>
+</Method>
+
+<Method name="ResubmitMessage">
+<Description><![CDATA[
+Resubmit the message header identified by <var>pHeaderId</var> to its target queue.
+Optional arguments <var>pNewTarget</var> and <var>pNewBody</var> specify replacement values for key header properties.
+If these are given, the Description property is updated with annotations giving the previous values.
+Finally the boolean <var>pHeadOfQueue</var> argument specifies whether the header should be resubmitted at the end of the target queue or at the head of the line.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pHeaderId:%String,pNewTarget:%String,pNewBody:%RegisteredObject,pHeadOfQueue:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC=..PrepareResubmitMessage(.tHeaderObj,.pHeaderId,.pNewTarget,.pNewBody)  Quit:$$$ISERR(tSC) tSC
+	Set tSC = ##class(Ens.Queue).EnQueue(tHeaderObj,.pHeadOfQueue)  Quit:$$$ISERR(tSC) $$$EnsError($$$EnsErrGeneral,"Error from EnQueue(); not resubmitting message '"_pHeaderId_"' : "_$$$StatusDisplayString(tSC))
+	Set tSC = $$$AuditResendMessage(pHeaderId)
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="PrepareResubmitMessage">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pHeaderObj:Ens.MessageHeader,pHeaderId:%String,pNewTarget:%String="",pNewBody:%RegisteredObject=$$$NULLOREF</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set pHeaderObj=$$$NULLOREF, tSC=$$$OK
+	If '##class(Ens.Director).IsProductionRunning() Quit $$$EnsError($$$EnsErrGeneral,"ProductionNotRunning; not resubmitting message '"_pHeaderId_"'")
+	Set tHdr = ##class(Ens.MessageHeader).%OpenId(pHeaderId,,.tSC)
+	Quit:'$IsObject(tHdr) $$$EnsError($$$EnsErrGeneral,"Not resubmitting; can not open message header '"_pHeaderId_"' : "_$$$StatusDisplayString(tSC))
+
+	Set:pNewTarget=tHdr.TargetConfigName pNewTarget=""
+	Set:""'=pNewTarget tOldTarget=tHdr.TargetConfigName_"( "_tHdr.TargetBusinessType_") / "_tHdr.TargetQueueName, tHdr.TargetConfigName=pNewTarget
+	Set tHdr.TargetQueueName=$G($$$ConfigQueueName($G($$$DispatchNameToConfigName(tHdr.TargetConfigName),0)))
+	Quit:""=tHdr.TargetQueueName $$$ERROR($$$EnsErrGeneral,"Target config item '"_tHdr.TargetConfigName_"' is not running")
+	Set tHdr.TargetBusinessType=$$$ConfigBusinessType(tHdr.TargetConfigName)
+	If ""'=pNewBody {
+		Set tOldClass=tHdr.MessageBodyClassName, tOldBodyId=tHdr.MessageBodyId
+		If '$IsObject(pNewBody) {
+			Set tHdr.MessageBodyClassName=""
+			Set tHdr.MessageBodyId=pNewBody
+		} Else {
+			Set tHdr.MessageBodyClassName=$classname(pNewBody)
+			Set:pNewBody.%IsA("%Library.Persistent")||pNewBody.%IsA("%Stream.Object") tSC=pNewBody.%Save()
+			Set:$$$ISOK(tSC) tSC=pNewBody.%GetSwizzleObject(0,.tOID)
+			If $$$ISERR(tSC) Set tHdr.MessageBodyId=""  Quit tSC
+			Set tHdr.MessageBodyId=$$$oidPrimary(tOID)
+		}
+	}
+	Set tHdr.Description="Resubmitted"_$S(""=pNewTarget:"",1:"; old Target = "_tOldTarget)_$S(""=pNewBody:"",1:"; old body = '"_tOldClass_" : "_tOldBodyId_"'")_$S(""=tHdr.Description:"", "Resubmitted"=$E(tHdr.Description,1,$L("Resubmitted")):","_$E(tHdr.Description,$L("Resubmitted")+1,*), 1:": "_tHdr.Description)
+	Kill ^Ens.MsgBank.Banked(pHeaderId) ; resubmit to the MsgBank too, if banking is active
+	Set pHeaderObj = tHdr
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="ResendDuplicatedMessage">
+<Description><![CDATA[
+Resend the message header identified by <var>pOriginalHeaderId</var> by constructing a copy of it and submitting the copy to its target queue.
+Optional arguments <var>pNewTarget</var>, <var>pNewBody</var> and <var>pNewSource</var> specify replacement values for key header properties.
+The Description property is updated with an annotation giving the original header ID.
+Finally the boolean <var>pHeadOfQueue</var> argument specifies whether the new header should be submitted at the end of the target queue or at the head of the line.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pOriginalHeaderId:%String,*pNewHeaderId:%String,pNewTarget:%String,pNewBody:%RegisteredObject,pNewSource:%String,pHeadOfQueue:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set pNewHeaderId="", tSC=..NewDuplicatedMessage(.tNewHeader,.pOriginalHeaderId,.pNewTarget,.pNewBody,.pNewSource)  Quit:$$$ISERR(tSC) tSC
+	Set tSC = ##class(Ens.Queue).EnQueue(tNewHeader,.pHeadOfQueue)  Quit:$$$ISERR(tSC) $$$EnsError($$$EnsErrGeneral,"Error from EnQueue(); not resending copy of original message '"_pOriginalHeaderId_"' : "_$$$StatusDisplayString(tSC))
+	Set pNewHeaderId=tNewHeader.%Id()
+	Set tSC = $$$AuditResendMessage(pNewHeaderId)
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="NewDuplicatedMessage">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pNewHeader:Ens.MessageHeader,pOriginalHeaderId:%String,pNewTarget:%String="",pNewBody:%RegisteredObject=$$$NULLOREF,pNewSource:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set pNewHeader=$$$NULLOREF, tSC=$$$OK
+	If '##class(Ens.Director).IsProductionRunning() Quit $$$ERROR($$$EnsErrProductionNotRunning)
+
+	Set tOldHdr = ##class(Ens.MessageHeader).%OpenId(pOriginalHeaderId)
+	If '$IsObject(tOldHdr) Quit $G(%objlasterror,$$$ERROR($$$EnsErrGeneral,"Can not open message header "_pOriginalHeaderId))
+
+	Set tNewHdr=tOldHdr.%ConstructClone() $$$ASSERT($IsObject(tNewHdr))
+	Set tNewHdr.TimeCreated = $$$timeUTC
+
+	If tNewHdr.Type = $$$eMessageTypeRequest {
+		Set tNewHdr.CorrespondingMessageId = ""
+		Set:""'=pNewTarget tNewHdr.TargetConfigName=pNewTarget
+		Set tNewHdr.TargetQueueName=$G($$$ConfigQueueName($G($$$DispatchNameToConfigName(tNewHdr.TargetConfigName),0)))
+		Quit:""=tNewHdr.TargetQueueName $$$ERROR($$$EnsErrGeneral,"Target config item '"_tNewHdr.TargetConfigName_"' is not running")
+		Set tNewHdr.TargetBusinessType=$$$ConfigBusinessType(tNewHdr.TargetConfigName)
+	} Else {
+		Quit:""'=pNewTarget $$$ERROR($$$EnsErrGeneral,"Can not send response messages to new target")
+		Quit:'##class(Ens.Queue).Exists(tNewHdr.TargetQueueName) $$$ERROR($$$EnsErrGeneral,"Target reply queue '"_tNewHdr.TargetQueueName_"' no longer exists")
+	}
+	If ""'=pNewSource {
+		Quit:""'=tOldHdr.ReturnQueueName $$$ERROR($$$EnsErrGeneral,"Cannot override source for synchronous request message "_pOriginalHeaderId)
+		Set tNewHdr.SourceConfigName = pNewSource
+		Set tNewHdr.SourceBusinessType = $$$ConfigBusinessType(pNewSource)
+		Set:""=tNewHdr.SourceBusinessType tNewHdr.SourceBusinessType=$$$eHostTypeService
+		Set tNewHdr.BusinessProcessId = ""
+	}
+	If ""'=pNewBody {
+		If '$IsObject(pNewBody) {
+			Set tNewHdr.MessageBodyClassName=""
+			Set tNewHdr.MessageBodyId=pNewBody
+		} Else {
+			Set tNewHdr.MessageBodyClassName=$classname(pNewBody)
+			Set:pNewBody.%IsA("%Library.Persistent")||pNewBody.%IsA("%Stream.Object") tSC=pNewBody.%Save()
+			Set:$$$ISOK(tSC) tSC=pNewBody.%GetSwizzleObject(0,.tOID)
+			If $$$ISERR(tSC) Set tNewHdr.MessageBodyId=""  Quit tSC
+			Set tNewHdr.MessageBodyId=$$$oidPrimary(tOID)
+		}
+	}
+	Set tNewHdr.Description="Resent "_pOriginalHeaderId_$S(""=tOldHdr.Description:"", "Resent "=$E(tOldHdr.Description,1,$L("Resent ")):","_$E(tOldHdr.Description,$L("Resent ")+1,*), 1:": "_tOldHdr.Description)
+	Set pNewHeader=tNewHdr
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="Purge">
+<Description><![CDATA[
+Replacement multi threaded capable method available in <CLASS>Ens.Util.MessagePurge</CLASS>
+]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pDeletedCount:%Integer,pDaysToKeep:%Integer=7,pKeepIntegrity:%Boolean=1,pBodiesToo:%Boolean=0,pBitmapPurgeRunLimit:%Integer=600</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set:'$TLEVEL tTransactionSuspendedSwitch = ##class(Ens.Util.Purge.SuspendTransaction).%New($$$EnsPurgeJournalOldDataGet)
+
+	New %tDoNotDeleteDate,%tID,%tBodyId,%tBodyClassname Set %tID="", %tDoNotDeleteDate = ##class(Ens.Purge).GetDoNotDeleteDate(pDaysToKeep)
+	If '$data($$$EnsJobLocal) New $$$EnsJobLocal Set $$$EnsJobLocal = ""
+	Set tSC=$$$OK, SQLCODE=0, pDeletedCount=0, pDeletedCount("bodies")=0
+	Set tSC1 = ##class(%SYS.Monitor.Interop.DatabaseImpact.Utils).LogDatabaseSizes(0)
+	If $$$ISERR(tSC1) {
+		$$$LOGWARNING("Error encountered logging database impact metrics: "_$system.Status.GetErrorText(tSC1))
+	}
+	#; Log purging errors in Event log but no more than $$$ensPurgeMaxWarn per type (body, search table & header)
+	#dim tPurgeErrorWarningsArray = $$$ensPurgeMaxWarn
+	If pBodiesToo {
+		If pKeepIntegrity {
+			&sql(DECLARE C1 CURSOR FOR
+				Select TOP 100000000 ID,MessageBodyId,MessageBodyClassName Into :%tID,:%tBodyId,:%tBodyClassname From Ens.MessageHeader h
+					Where (TimeCreated < :%tDoNotDeleteDate)
+						And 0 = ( Select Count(*) From Ens.MessageHeader
+									Where (SessionId = h.SessionId)
+										And (Status<>$$$eMessageStatusCompleted)
+										And (Status<>$$$eMessageStatusAborted)
+										And (Status<>$$$eMessageStatusError)
+										And (Status<>$$$eMessageStatusDiscarded) )
+					Order By TimeCreated
+				)
+			&sql(OPEN C1)
+			For { &sql(FETCH C1)  Quit:SQLCODE
+				If %tBodyId'="" {
+					#; Delete body if body class exists and is persistent and ENSPURGE is NOT explicitly set to 0 (i.e. ENSPURGE=1 by default)
+					Set:""=%tBodyClassname&&(%tBodyId=+%tBodyId) %tBodyClassname="Ens.MessageBody"
+					If ""'=%tBodyClassname {
+						Set tExists=$G(aClass(%tBodyClassname))
+						If 0'=tExists {
+							If ""=tExists&&'($$$comClassDefined(%tBodyClassname)&&($classmethod(%tBodyClassname,"%IsA","%Persistent")||$classmethod(%tBodyClassname,"%IsA","%Stream.Object")))||($parameter(%tBodyClassname,"ENSPURGE")=0) {
+								Set aClass(%tBodyClassname)=0
+							} Else {
+								try {
+									Set tSC1=$classmethod(%tBodyClassname,"%DeleteId",%tBodyId)
+									Set:""=tExists aClass(%tBodyClassname)=1, tExists=1 ; , aClass(%tBodyClassname,"extent")=##class(Ens.VDoc.SearchTableGenerator).GetExtentSuperclass(%tBodyClassname)
+								} catch {
+									Set tSC1 = $$$SystemError
+								}
+								If $$$ISOK(tSC1) || $$$StatusEquals(tSC1,$$$DeleteObjectNotFound,$$$FileCanNotDelete,$$$NotAnInstanceError) {
+									Set tSC2 = ##class(Ens.SearchTableBase).RemoveSearchTableEntries(%tBodyClassname,%tBodyId,1)
+									If $$$ISERR(tSC2)&&'$G(aClass(%tBodyClassname,"doneErrST")) && '$$$StatusEquals(tSC2,$$$DeleteObjectNotFound,$$$FileCanNotDelete,$$$NotAnInstanceError) { ; || ($$$StatusEquals(tSC2,$$$NotAnInstanceError) && '$classmethod(aClass(%tBodyClassname,"extent"),"%ExistsId",%tBodyId))
+										Set tMsg = "Failed to purge SearchTable entries for deleted body with BodyClassname='"_%tBodyClassname_"', BodyId='"_%tBodyId_"' from header "_%tID_" :"_$$$StatusDisplayString(tSC2)
+										Set tSC = ..ReportPurgeError($$$ensPurgeST,tMsg,tSC,tSC2,.tPurgeErrorWarningsArray)
+										#; If error purging search table but body purged/already deleted then carry on
+									}
+								} Else {
+									Set tMsg = "Failed to purge body for header "_%tID_", BodyClassname='"_%tBodyClassname_"':"_$$$StatusDisplayString(tSC1)
+									Set tSC = ..ReportPurgeError($$$ensPurgeBody,tMsg,tSC,tSC1,.tPurgeErrorWarningsArray)
+									#; If protect error purging body continue to next message and do not try to delete message header
+									If (tMsg["<PROTECT>") Continue
+								}
+								Set pDeletedCount("bodies")=pDeletedCount("bodies")+$$$ISOK(tSC1)
+							}
+						}
+					}
+				}
+				&sql(DELETE From Ens.MessageHeader Where ID = :%tID)
+				Set pDeletedCount=pDeletedCount+%ROWCOUNT
+				If SQLCODE {
+					Set tMsg = "Failed to purge message header "_%tID_": SQLCODE="_SQLCODE Set:$G(%msg)'="" tMsg = tMsg_", %msg="_%msg
+					Set tSC = ..ReportPurgeError($$$ensPurgeHdr,tMsg,tSC,$$$ERROR($$$EnsErrGeneral,tMsg),.tPurgeErrorWarningsArray)
+					/*	If protect error when trying to delete message header quit purge completely
+						as all message header purges will encounter protect
+					*/
+					If (tMsg["<PROTECT>") Quit
+				}
+			} Set tCode=SQLCODE &sql(CLOSE C1) Set:'SQLCODE SQLCODE=tCode
+		} Else {
+			&sql(DECLARE C2 CURSOR FOR
+				Select ID,MessageBodyId,MessageBodyClassName Into :%tID,:%tBodyId,:%tBodyClassname From Ens.MessageHeader
+					Where (TimeCreated < :%tDoNotDeleteDate))
+			&sql(OPEN C2)
+			For { &sql(FETCH C2)  Quit:SQLCODE
+				If %tBodyId'="" {
+					#; Delete body if body class exists and is persistent and ENSPURGE is NOT explicitly set to 0 (i.e. ENSPURGE=1 by default)
+					Set:""=%tBodyClassname&&(%tBodyId=+%tBodyId) %tBodyClassname="Ens.MessageBody"
+					If ""'=%tBodyClassname {
+						Set tExists=$G(aClass(%tBodyClassname))
+						If 0'=tExists {
+							If ""=tExists&&'($$$comClassDefined(%tBodyClassname)&&($classmethod(%tBodyClassname,"%IsA","%Persistent")||$classmethod(%tBodyClassname,"%IsA","%Stream.Object")))||($parameter(%tBodyClassname,"ENSPURGE")=0) {
+								Set aClass(%tBodyClassname)=0
+							} Else {
+								try {
+									Set tSC1=$classmethod(%tBodyClassname,"%DeleteId",%tBodyId)
+									Set:""=tExists aClass(%tBodyClassname)=1, tExists=1 ;, aClass(%tBodyClassname,"extent")=##class(Ens.VDoc.SearchTableGenerator).GetExtentSuperclass(%tBodyClassname)
+								} catch {
+									Set tSC1 = $$$SystemError
+								}
+								If $$$ISOK(tSC1) || $$$StatusEquals(tSC1,$$$DeleteObjectNotFound,$$$FileCanNotDelete,$$$NotAnInstanceError) {
+									Set tSC2 = ##class(Ens.SearchTableBase).RemoveSearchTableEntries(%tBodyClassname,%tBodyId,1)
+									If $$$ISERR(tSC2)&&'$G(aClass(%tBodyClassname,"doneErrST")) && '$$$StatusEquals(tSC2,$$$DeleteObjectNotFound,$$$FileCanNotDelete,$$$NotAnInstanceError) { ; || ($$$StatusEquals(tSC2,$$$NotAnInstanceError) && '$classmethod(aClass(%tBodyClassname,"extent"),"%ExistsId",%tBodyId))
+										Set tMsg = "Failed to purge SearchTable entries for deleted body with BodyClassname='"_%tBodyClassname_"', BodyId='"_%tBodyId_"' from header "_%tID_" :"_$$$StatusDisplayString(tSC2)
+										Set tSC = ..ReportPurgeError($$$ensPurgeST,tMsg,tSC,tSC2,.tPurgeErrorWarningsArray)
+										#; If error purging search table but body purged/already deleted then carry on
+									}
+								} Else {
+									Set tMsg = "Failed to purge body for header "_%tID_", BodyClassname='"_%tBodyClassname_"':"_$$$StatusDisplayString(tSC1)
+									Set tSC = ..ReportPurgeError($$$ensPurgeBody,tMsg,tSC,tSC1,.tPurgeErrorWarningsArray)
+									#; If protect error purging body continue to next message and do not try to delete message header
+									If (tMsg["<PROTECT>") Continue
+								}
+								Set pDeletedCount("bodies")=pDeletedCount("bodies")+$$$ISOK(tSC1)
+							}
+						}
+					}
+				}
+				&sql(DELETE From Ens.MessageHeader Where ID = :%tID)
+				Set pDeletedCount=pDeletedCount+%ROWCOUNT
+				If SQLCODE {
+					Set tMsg = "Failed to purge message header "_%tID_": SQLCODE="_SQLCODE Set:$G(%msg)'="" tMsg = tMsg_", %msg="_%msg
+					Set tSC = ..ReportPurgeError($$$ensPurgeHdr,tMsg,tSC,$$$ERROR($$$EnsErrGeneral,tMsg),.tPurgeErrorWarningsArray)
+					/*	If protect error when trying to delete message header quit purge completely
+						as all message header purges will encounter protect
+					*/
+					If (tMsg["<PROTECT>") Quit
+				}
+			} Set tCode=SQLCODE &sql(CLOSE C2) Set:'SQLCODE SQLCODE=tCode
+		}
+	} Else {
+		If pKeepIntegrity {
+			&sql(DECLARE C3 CURSOR FOR
+				Select TOP 100000000 ID Into :%tID From Ens.MessageHeader h
+					Where TimeCreated < :%tDoNotDeleteDate
+						And 0 = ( Select Count(*) From Ens.MessageHeader
+								Where (SessionId = h.SessionId)
+									And (Status<>$$$eMessageStatusCompleted)
+									And (Status<>$$$eMessageStatusAborted)
+									And (Status<>$$$eMessageStatusError)
+									And (Status<>$$$eMessageStatusDiscarded) )
+					Order By TimeCreated
+				)
+			&sql(OPEN C3) For { &sql(FETCH C3)  Quit:SQLCODE
+				&sql(Delete From Ens.MessageHeader Where ID=:%tID)
+				Set pDeletedCount=pDeletedCount+%ROWCOUNT
+				If SQLCODE {
+					Set tMsg = "Failed to purge message header "_%tID_": SQLCODE="_SQLCODE Set:$G(%msg)'="" tMsg = tMsg_", %msg="_%msg
+					Set tSC = ..ReportPurgeError($$$ensPurgeHdr,tMsg,tSC,$$$ERROR($$$EnsErrGeneral,tMsg),.tPurgeErrorWarningsArray)
+					/*	If protect error when trying to delete message header quit purge completely
+						as all message header purges will encounter protect
+					*/
+					If (tMsg["<PROTECT>") Quit
+				}
+			} Set tCode=SQLCODE &sql(CLOSE C3) Set:'SQLCODE SQLCODE=tCode
+		} Else {
+			&sql(DECLARE C4 CURSOR FOR
+				Select ID Into :%tID From Ens.MessageHeader Where TimeCreated < :%tDoNotDeleteDate)
+			&sql(OPEN C4) For { &sql(FETCH C4)  Quit:SQLCODE
+				Set %ROWCOUNT=0
+				&sql(Delete From Ens.MessageHeader Where ID=:%tID)
+				Set pDeletedCount=pDeletedCount+%ROWCOUNT
+				If SQLCODE {
+					Set tMsg = "Failed to purge message header "_%tID_": SQLCODE="_SQLCODE Set:$G(%msg)'="" tMsg = tMsg_", %msg="_%msg
+					Set tSC = ..ReportPurgeError($$$ensPurgeHdr,tMsg,tSC,$$$ERROR($$$EnsErrGeneral,tMsg),.tPurgeErrorWarningsArray)
+					/*	If protect error when trying to delete message header quit purge completely
+						as all message header purges will encounter protect
+					*/
+					If (tMsg["<PROTECT>") Quit
+				}
+			} Set tCode=SQLCODE &sql(CLOSE C4) Set:'SQLCODE SQLCODE=tCode
+		}
+	}
+	Set:SQLCODE&&(SQLCODE'=100) tSC=$$$ADDSC(tSC,$$$ERROR($$$EnsErrGeneral,"Purge error at ID "_$G(%tID)_"; SQLCODE = "_SQLCODE))
+	Set tBitmapSC = ..PurgeBitmaps(pBitmapPurgeRunLimit,.tDeletedChunks)
+	Merge pDeletedCount("bitmaps") = tDeletedChunks
+
+	Kill tTransactionSuspendedSwitch
+	Set tSC1 = ##class(%SYS.Monitor.Interop.DatabaseImpact.Utils).LogDatabaseSizes(0)
+	If $$$ISERR(tSC1) {
+		$$$LOGWARNING("Error encountered logging database impact metrics: "_$system.Status.GetErrorText(tSC1))
+	}
+
+	Quit $$$ADDSC(tSC,tBitmapSC)
+]]></Implementation>
+</Method>
+
+<Method name="ReportPurgeError">
+<Description>
+Internal method used by this class and Ens.EnterpriseMsgBank.MessageHeader</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pType:%Integer,pMsg:%String,pSC:%Status,pSC2:%Status,&pPurgeErrorWarningsArray]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim tThisTypeCount As %Integer = $Increment(pPurgeErrorWarningsArray(pType))
+	If (tThisTypeCount <= $Get(pPurgeErrorWarningsArray,$$$ensPurgeMaxWarn)) {
+		$$$LOGWARNING(pMsg)
+		#; No matter the # of errors to log in event log cap error concatenation to 10 as was the case for PurgeSetTemp
+		If (tThisTypeCount < $$$ensPurgeMaxStatus) {
+			Set pSC = $$$ADDSC(pSC,pSC2)
+		}
+	} ElseIf (tThisTypeCount = ($G(pPurgeErrorWarningsArray,$$$ensPurgeMaxWarn) + 1)) {
+		#; may not get here due to quitting on certain errors but report only once per data type.
+		$$$LOGERROR("No longer reporting purge failures related to "_$Case(pType,$$$ensPurgeBody:"message bodies",$$$ensPurgeST:"search tables",:"message headers"))
+	}
+	Return pSC
+]]></Implementation>
+</Method>
+
+<Method name="PurgeSetTemp">
+<Description><![CDATA[
+Deprecated. No longer used by InterSystems Code.
+Replaced by ReportPurgeError
+Log a warning in the Event Log; add to tSC status; set error/warning in a temp global as below: <br>
+Total error count is in subscript 0. <br>
+Errors while deleting message headers are in subscript 1. <br>
+Errors while deleting message bodies are in subscript 2. <br>
+Errors while deleting search table entries are in subscript 3.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pType:%Integer,pMsg:%String,pSC:%Status,pSC2:%Status</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	$$$LOGWARNING(pMsg)
+	Set tCount0 = $I(^IRIS.Temp.EnsPurgeMessage($Job,0))
+	Set tCount = $I(^IRIS.Temp.EnsPurgeMessage($Job,pType))
+	Set:$G(%tID)'="" ^IRIS.Temp.EnsPurgeMessage($Job,pType,%tID) = pMsg
+	If tCount0<11 {
+		Set pSC = $$$ADDSC(pSC,pSC2)
+	}
+	ElseIf tCount0=11 {
+		Set pSC = $$$ADDSC(pSC,$$$ERROR($$$GeneralError,"There are more errors and/or warnings, see the Ensemble Event Log and ^IRIS.Temp.EnsPurgeMessage("_$Job_") for the full list"))
+	}
+	Else {
+		// do not put into pSC more than 10 messages
+	}
+	Quit pSC
+]]></Implementation>
+</Method>
+
+<Method name="needsReply">
+<CodeMode>expression</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[(""'=..ReturnQueueName) || (..Priority<=$$$eMessagePrioritySync)
+]]></Implementation>
+</Method>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tID=$$$oidPrimary(oid)
+	Kill:""'=tID ^Ens.MsgBank.Banked(tID)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Trigger name="OnDelete">
+<Code>	New tID
+	Set tID={%%ID}
+	Kill ^Ens.MsgBank.Banked(tID)
+	Quit</Code>
+<Event>DELETE</Event>
+</Trigger>
+
+<XData name="FormDefinition">
+<Data><![CDATA[
+<FieldDefinition>
+	<field property="SessionId"/>
+	<field property="TargetConfigName"/>
+	<field property="SourceConfigName"/>
+	<field property="MessageBodyClassName"/>
+	<field property="MessageBodyId"/>
+	<field property="TimeCreated"/>
+	<field property="TimeProcessed"/>
+	<field property="Type"/>
+	<field property="Priority"/>
+	<field property="SourceBusinessType"/>
+	<field property="TargetQueueName"/>
+	<field property="TargetBusinessType"/>
+	<field property="ReturnQueueName"/>
+	<field property="CorrespondingMessageId"/>
+	<field property="BusinessProcessId"/>
+	<field property="Description"/>
+	<field property="Invocation"/>
+	<field property="SuperSession"/>
+	<field property="Resent"/>
+	<field property="Status"/>
+	<field property="IsError"/>
+	<field property="ErrorStatus"/>
+	<field property="Banked"/>
+</FieldDefinition>
+]]></Data>
+</XData>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>^Ens.MessageHeaderD</DataLocation>
+<DefaultData>MessageHeaderDefaultData</DefaultData>
+<IdLocation>^Ens.MessageHeaderD</IdLocation>
+<IndexLocation>^Ens.MessageHeaderI</IndexLocation>
+<StreamLocation>^Ens.MessageHeaderS</StreamLocation>
+<ExtentSize>20000000</ExtentSize>
+<Data name="MessageHeaderDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>BusinessProcessId</Value>
+</Value>
+<Value name="3">
+<Value>Category</Value>
+</Value>
+<Value name="4">
+<Value>CorrespondingMessageId</Value>
+</Value>
+<Value name="5">
+<Value>ErrorStatus</Value>
+</Value>
+<Value name="6">
+<Value>Invocation</Value>
+</Value>
+<Value name="7">
+<Value>IsError</Value>
+</Value>
+<Value name="8">
+<Value>MessageBody</Value>
+</Value>
+<Value name="9">
+<Value>Priority</Value>
+</Value>
+<Value name="10">
+<Value>ReturnQueueName</Value>
+</Value>
+<Value name="11">
+<Value>SessionId</Value>
+</Value>
+<Value name="12">
+<Value>SourceConfigName</Value>
+</Value>
+<Value name="13">
+<Value>Status</Value>
+</Value>
+<Value name="14">
+<Value>TargetConfigName</Value>
+</Value>
+<Value name="15">
+<Value>TargetQueueName</Value>
+</Value>
+<Value name="16">
+<Value>TimeCreated</Value>
+</Value>
+<Value name="17">
+<Value>TimeProcessed</Value>
+</Value>
+<Value name="18">
+<Value>Type</Value>
+</Value>
+<Value name="19">
+<Value>MessageBodyId</Value>
+</Value>
+<Value name="20">
+<Value>SourceBusinessType</Value>
+</Value>
+<Value name="21">
+<Value>TargetBusinessType</Value>
+</Value>
+<Value name="22">
+<Value>MessageBodyClassName</Value>
+</Value>
+<Value name="23">
+<Value>Description</Value>
+</Value>
+<Value name="24">
+<Value>SuperSession</Value>
+</Value>
+<Value name="25">
+<Value>Resent</Value>
+</Value>
+</Data>
+<Property name="MessageBodyClassName">
+<Selectivity>10%</Selectivity>
+</Property>
+<Property name="MessageBodyId">
+<Selectivity>0.0001%</Selectivity>
+</Property>
+<Property name="Priority">
+<Selectivity>20%</Selectivity>
+</Property>
+<Property name="SessionId">
+<Selectivity>20</Selectivity>
+</Property>
+<Property name="SourceConfigName">
+<Selectivity>5%</Selectivity>
+</Property>
+<Property name="Status">
+<Selectivity>11%</Selectivity>
+</Property>
+<Property name="TargetConfigName">
+<Selectivity>5%</Selectivity>
+</Property>
+<Property name="TimeCreated">
+<Selectivity>5</Selectivity>
+</Property>
+<Property name="TimeProcessed">
+<Selectivity>5</Selectivity>
+</Property>
+</Storage>
+</Class>
+
+
+<Class name="Ens.Production">
+<Copyright>/* Copyright (c) 2025 by InterSystems Corporation.
+   Cambridge, Massachusetts, U.S.A.  All rights reserved.
+   Confidential property of InterSystems Corporation. */</Copyright>
+<Abstract>1</Abstract>
+<ClassType/>
+<IncludeCode>Ensemble</IncludeCode>
+<IncludeGenerator>Ensemble</IncludeGenerator>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,Ens.Settings</Super>
+<System>4</System>
+<TimeChanged>67275,65008.217</TimeChanged>
+<TimeCreated>59312,71352.764</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="ShutdownTimeout">
+<Description>
+Amount of time to wait for a click on Stop Production to succeed</Description>
+<Type>%Numeric</Type>
+<InitialExpression>120</InitialExpression>
+<Parameter name="MAXVAL" value="3600"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="UpdateTimeout">
+<Description><![CDATA[
+Amount of time to wait for Production updates to succeed <br>
+This means both clicking UpdateProduction and clicking Apply for changes to a configuration item in a running production.]]></Description>
+<Type>%Numeric</Type>
+<InitialExpression>10</InitialExpression>
+<Parameter name="MAXVAL" value="3600"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="AlertNotificationManager">
+<Description>
+The default Alert Notification Manager for use by the Managed Alert framework.</Description>
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Property name="AlertNotificationOperation">
+<Description>
+The default Alert Notification Operation for use by the Managed Alert framework.
+The Notification Manager can be configured to send notifications to other hosts within the production,
+but this setting provides a fallback for situations which are not captured by the logic in the Notification Manager.</Description>
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Property name="AlertNotificationRecipients">
+<Description>
+A comma-separated list of recipients that should be used for alert notifications
+when no other recipients have been specified by the notification framework.</Description>
+<Type>%Library.String</Type>
+<Parameter name="MAXLEN" value="2048"/>
+</Property>
+
+<Property name="AlertActionWindow">
+<Description>
+The default number of minutes within which a Managed Alert should be acted upon.</Description>
+<Type>%Library.Integer</Type>
+<InitialExpression>##class(Ens.Alerting.Utils).#DEFAULTACTIONWINDOW</InitialExpression>
+</Property>
+
+<Parameter name="SETTINGS">
+<Default>ShutdownTimeout,UpdateTimeout,AlertNotificationManager:Alerting,AlertNotificationOperation:Alerting,AlertNotificationRecipients:Alerting,AlertActionWindow:Alerting</Default>
+</Parameter>
+
+<Projection name="Production">
+<Type>Ens.Projection.Production</Type>
+</Projection>
+
+<Method name="Start">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ##class(Ens.Director).StartProduction($classname())
+]]></Implementation>
+</Method>
+
+<Method name="Update">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pTimeout:%Numeric,pForce:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ##class(Ens.Director).UpdateProduction(.pTimeout,.pForce)
+]]></Implementation>
+</Method>
+
+<Method name="Stop">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pTimeout:%Numeric,pForce:%Boolean</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit ##class(Ens.Director).StopProduction(.pTimeout,.pForce)
+]]></Implementation>
+</Method>
+
+<Method name="OnStart">
+<Description>
+Override this in your Production class to do setup before the Production starts</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pTimeStarted:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnStop">
+<Description>
+Override this in your Production class to do cleanup after the Production stops</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pTimeStarted:%String,pForced:%Boolean</FormalSpec>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="Register">
+<Description>
+Deprecated</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set $ZT="Trap",tSC=$$$OK
+	Do {
+		Set tSC=##class(Ens.Config.Production).LoadFromClass($classname())
+		Do:$$$ISERR(tSC) $system.OBJ.DisplayError(tSC)
+	} while (0)
+Exit
+	Quit tSC
+Trap
+ 	Set $ZT="",tSC=$$$EnsSystemError
+	Goto Exit
+]]></Implementation>
+</Method>
+
+<Method name="TestStart">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC = ##class(Ens.Director).GetProductionStatus(.tProductionName,.tState)
+	If $$$ISERR(tSC) {
+		$$$LOGSTATUS(tSC)
+		Quit tSC
+	}
+	If tState=$$$eProductionStateRunning {
+		if tProductionName '= $$$CurrentClass {
+			w !,"Stop production "_tProductionName_"? [No] "  Read tInput,!  Quit:$Case($ZCVT(tInput,"L"),"yes":0,"y":0,:1) $$$ERROR($$$EnsErrGeneral,"Not stopping Production "_tProductionName)
+			w "Stopping production ",tProductionName,!
+			Set tSC = ..Stop() Quit:$$$ISERR(tSC) tSC
+			Set tState=0
+		}
+		else { w !,"Already running "_$$$CurrentClass,! }
+	}
+	If tState'=$$$eProductionStateRunning {
+		Set tSC = ..Start()
+	}
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="GetSettingValue">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>pName:%String,*pStatus:%Status</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[##class(Ens.Director).GetProductionSettingValue("",.pName,.pStatus)
+]]></Implementation>
+</Method>
+
+<Method name="GetSettingsArray">
+<ClassMethod>1</ClassMethod>
+<CodeMode>expression</CodeMode>
+<FormalSpec>*pSettings</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[##class(Ens.Director).GetProductionSettings("",.pSettings)
+]]></Implementation>
+</Method>
+
+<Method name="ApplySettings">
+<Description><![CDATA[
+Apply multiple settings to a production
+<var>pProductionName</var> is the name of the Production to which to apply the settings <br/>
+<var>pSettings</var> is a local array of settings structured in the following way: <br/>
+   pSettings(&lt;itemName&gt;,&lt;target&gt;,&lt;settingName&gt;)=&lt;settingValue&gt; <br/>
+Where:  <br/>
+   &lt;itemName&gt; is the configuration item name in the production  <br/>
+    &lt;target&gt; Is one of:  <br/>
+        Item: Means the setting is a property of the item itself, such as PoolSize  <br/>
+        Host: Sets a host setting  <br/>
+        Adapter: Sets an adapter setting  <br/>
+    &lt;settingName&gt; is the setting name  <br/>
+    &lt;settingValue&gt; is the desired value of the setting. <br/>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pProductionName:%String,&pSettings]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim tSC As %Status
+	Set tSC=$$$OK,$ZT="Trap"
+	Do {
+		#dim tState As %Integer
+		#dim tRunningProduction As %String
+		#dim tProduction As Ens.Config.Production
+		#dim tItem,tTarget,tSetting
+		
+		// Grab the state of the production
+		Set tSC = ##class(Ens.Director).GetProductionStatus(.tRunningProduction,.tState)
+		If $$$ISERR(tSC) {
+			$$$LOGSTATUS(tSC)
+			Quit
+		}
+		
+		// Open the production up
+		Set tProduction = ##class(Ens.Config.Production).%OpenId(pProductionName,,.tSC) Quit:$$$ISERR(tSC)
+		
+		// Walk the bag of settings
+		Set tItem = ""
+		While ($$$ISOK(tSC)) {
+			Set tItem = $ORDER(pSettings(tItem))
+			Quit:tItem=""
+			
+			#dim tItemObj As Ens.Config.Item
+
+			// We want to force swizzle of items if the production is running so all items are modified
+			Set tItemObj = tProduction.FindItemByConfigName(tItem, .tSC, 1)
+			If '$IsObject(tItemObj) {
+				Set tSC=$$$ERROR($$$EnsErrProductionSettingInvalid,pProductionName,tItem)
+				Quit
+			}
+			// If tItemObj is an object but tSC is an error we will now quit
+			If $$$ISERR(tSC) Quit
+
+			// Now, for each item, we must see what we're applying it to
+			Set tTarget = ""
+			While ($$$ISOK(tSC)) {
+				Set tTarget = $ORDER(pSettings(tItem,tTarget))
+				Quit:tTarget=""
+
+				// And what actual setting this is ...
+				Set tSetting = ""
+				While ($$$ISOK(tSC)) {
+					Set tSetting = $ORDER(pSettings(tItem,tTarget,tSetting))
+					Quit:tSetting=""
+				
+					If tTarget="Item" {
+						// If the target is an item, then we're setting a property *on* the config item
+						If $$$comMemberDefined("Ens.Config.Item",$$$cCLASSproperty,tSetting) {
+							Set $ZOBJPROPERTY(tItemObj,tSetting) = pSettings(tItem,tTarget,tSetting)
+						} Else {
+							// No such property, report an error
+							Set tSC=$$$ERROR($$$PropertyDoesNotExist,tSetting)
+							Quit
+						}
+					} Else {
+						// Apply the setting
+						#dim tSettingObj As Ens.Config.Setting
+						Set tSettingObj = tItemObj.FindSettingByName(tSetting,tTarget)
+						If '$IsObject(tSettingObj) {
+							// This is a new setting
+							Set tSettingObj = ##class(Ens.Config.Setting).%New()
+							Set tSettingObj.Name = tSetting
+							Do tItemObj.Settings.Insert(tSettingObj)
+						}
+						
+						// We can finally set the setting
+						Set tSettingObj.Target = tTarget
+						Set tSettingObj.Value = pSettings(tItem,tTarget,tSetting)
+					}
+				}
+			}
+		}
+		// If we errored, bail out
+		Quit:$$$ISERR(tSC)
+				
+		// Save the changes we made to the production
+		Set tSC = tProduction.%Save(1)
+		Quit:$$$ISERR(tSC)
+
+		// Regenerate the XData in the corresponding class
+		Set tSC = tProduction.SaveToClass()
+		Quit:$$$ISERR(tSC)
+
+		// Finally, does the production need updating?
+		If (tRunningProduction=pProductionName)&&(tState=$$$eProductionStateRunning) {
+			// Update the running production with the new settings
+			Set tSC = ##class(Ens.Director).UpdateProduction(##class(Ens.Director).GetRunningProductionUpdateTimeout())
+		}
+		
+	} While (0)
+Exit
+	Quit tSC
+Trap
+	Set $ZT="",tSC=$$$EnsSystemError
+	Goto Exit
+]]></Implementation>
+</Method>
+
+<Method name="OnConfigChange">
+<Description>
+This method is called when config changes to the Production or any item are saved from the portal</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pProduction:Ens.Config.Production,pItem:Ens.Config.Item</FormalSpec>
+</Method>
+</Class>
+
+
+<Class name="Ens.Util.Log">
+<Copyright>/* Copyright (c) 2025 by InterSystems Corporation.
+   Cambridge, Massachusetts, U.S.A.  All rights reserved.
+   Confidential property of InterSystems Corporation. */</Copyright>
+<Description><![CDATA[
+This class defines the primary Event log.<br/>
+Applications can execute queries against this data if they wish but should
+not invoke these methods directly. Instead, use the macros defined in 
+Ensemble.inc (e.g., $$$LOGINFO et al).]]></Description>
+<IncludeCode>Ensemble,%sySystem</IncludeCode>
+<Super>%Persistent,Ens.Util.LogBase,%XML.Adaptor</Super>
+<System>4</System>
+<TimeChanged>67275,65008.4</TimeChanged>
+<TimeCreated>59266,28091.671</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Parameter name="XMLTYPE">
+<Default>LogEvent</Default>
+</Parameter>
+
+<Index name="Extent">
+<Type>bitmap</Type>
+<Extent>1</Extent>
+</Index>
+
+<Index name="TimeLogged">
+<Properties>TimeLogged</Properties>
+</Index>
+
+<Index name="Type">
+<Type>bitmap</Type>
+<Properties>Type</Properties>
+</Index>
+
+<Index name="ConfigName">
+<Type>bitmap</Type>
+<Properties>ConfigName</Properties>
+</Index>
+
+<Method name="LogStatus">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pStatus:%Status,pFramesToHide=-1,&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	If $$$ISOK(pStatus) {
+		Do ..Log($$$eLogTypeInfo,pSourceClass,pSourceMethod,"Status OK",-1)
+	} Else {
+		Do ..Log($$$eLogTypeError,pSourceClass,pSourceMethod,$$$StatusDisplayString(pStatus,$C(13,10,43,13,10)),$S(pFramesToHide<0:1,1:pFramesToHide+1),pStatus,.pMsgSubstitutes)
+	}
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogAssert">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..Log($$$eLogTypeAssert,pSourceClass,pSourceMethod,pMsgText,1,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogError">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..Log($$$eLogTypeError,pSourceClass,pSourceMethod,pMsgText,1,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogWarning">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..Log($$$eLogTypeWarning,pSourceClass,pSourceMethod,pMsgText,-1,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogAlert">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..Log($$$eLogTypeAlert,pSourceClass,pSourceMethod,pMsgText,-1,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogInfo">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..Log($$$eLogTypeInfo,pSourceClass,pSourceMethod,pMsgText,-1,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogTrace">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pSourceClass:%String,pSourceMethod:%String,pMsgText:%String="",pTraceCategory:%String,&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do ..LogNoTrace($$$eLogTypeTrace,pSourceClass,pSourceMethod,pMsgText,-1,.pTraceCategory,,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="Log">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pLogType:Ens.DataType.LogType,pSourceClass:%String,pSourceMethod:%String,pMsgText:%String,pFramesToHide:%Integer=-1,pStatus:%Status=$$$OK,&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	Do:(""'=$G($$$JobTraceDevice))||$$$IsTerminalDevice($IO) ##class(Ens.Util.Trace).WriteTrace("nolog",pSourceClass,pSourceMethod,pMsgText)
+	Do ..LogNoTrace(pLogType, pSourceClass, pSourceMethod, pMsgText, $S(pFramesToHide<0:-1,1:pFramesToHide+1),,pStatus,.pMsgSubstitutes)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="LogNoTrace">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pLogType:Ens.DataType.LogType,pSourceClass:%String,pSourceMethod:%String,pMsgText:%String,pFramesToHide:%Integer=-1,pTraceCategory:%String="",pStatus:%Status=$$$OK,&pMsgSubstitutes=0]]></FormalSpec>
+<Implementation><![CDATA[
+	New %ROWID,%ROWCOUNT
+	Set tTimeLogged = $$$timeUTC
+	Set tJob=$Job
+	Set tConfigName = $$$JobConfigName
+	Set tSessionId = $G($$$JobSessionId)
+	Set tMessageId = $G($$$JobCurrentHeaderId)
+	Set:(tMessageId="") tMessageId = $G(^Ens.MessageHeaderD)
+	Set tStack=""
+	If pFramesToHide'<0 {
+		// For an error, try to get a stack trace with $STACK
+		Set:pLogType=$$$eLogTypeError tStack = ##class(Ens.Util.Trace).GetErrorTrace(pFramesToHide+1)
+		
+		// If no error trace is available, then get a $ZU(41) trace
+		Set:tStack="" tStack = ##class(Ens.Util.Trace).GetStackTrace(pFramesToHide+1)
+	}
+	If pMsgSubstitutes {
+		Set tTotalLen = $L(pLogType) + $L(pSourceClass) + $L(pSourceMethod) + $L(tSessionId) + $L(tMessageId) + $L(tConfigName) + $L(pTraceCategory) + $L(tJob) + $L(tStack) + $L(pMsgText) + $L(tTimeLogged) + $L(pStatus)
+		For i=1:1:pMsgSubstitutes {
+			Set tMsgPart = pMsgSubstitutes(i)
+			If pMsgText [ ("%"_i) {
+				If tTotalLen = $$$MaxLocalLength {
+					Set tMsgPart = ".."
+				} ElseIf (tTotalLen - 2 + $L(tMsgPart)) > $$$MaxLocalLength {
+					Set tAppend = "...Warning: string truncated!"
+					Set tMsgPart = $E(tMsgPart,1,$$$MaxLocalLength - tTotalLen + 2 - $L(tAppend))_tAppend
+				}
+				Set pMsgText = $Replace(pMsgText,("%"_i),tMsgPart)
+				Set tTotalLen = tTotalLen - 2 + $L(tMsgPart)
+			}
+		}
+	}
+
+	&sql(Insert Into Ens_Util.Log Set Type = :pLogType, SourceClass = :pSourceClass, SourceMethod = :pSourceMethod, SessionId = :tSessionId,MessageId = :tMessageId, ConfigName = :tConfigName, TraceCat=:pTraceCategory, Job = :tJob, Stack = :tStack, Text = :pMsgText, TimeLogged = :tTimeLogged, StatusValue = :pStatus)
+	$$$IncLogCounter(pLogType)
+	If pLogType=$$$eLogTypeAlert Do ..SendToMonitor(%ROWID)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="Purge">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pDeletedCount:%Integer,pDaysToKeep:%Integer=7,pDummy:%Boolean,pBitmapPurgeRunLimit:%Integer=600</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set:'$TLEVEL tTransactionSuspendedSwitch = ##class(Ens.Util.Purge.SuspendTransaction).%New($$$EnsPurgeJournalOldDataGet)
+
+	New %tDoNotDeleteDate,%tID Set %tID="", %tDoNotDeleteDate = ##class(Ens.Purge).GetDoNotDeleteDate(pDaysToKeep)
+	Set SQLCODE=0, pDeletedCount=0
+	&sql(DECLARE C1 CURSOR FOR
+		Select ID Into :%tID From Ens_Util.Log Where TimeLogged < :%tDoNotDeleteDate)
+	&sql(OPEN C1) For { &sql(FETCH C1)  Quit:SQLCODE
+		&sql(Delete From Ens_Util.Log Where ID=:%tID)
+		Set pDeletedCount=pDeletedCount+%ROWCOUNT
+	} Set tCode=SQLCODE &sql(CLOSE C1) Set:'SQLCODE SQLCODE=tCode
+	Quit:SQLCODE&&(SQLCODE'=100) $$$ERROR($$$EnsErrGeneral,"Purge error at ID "_%tID _"; SQLCODE = "_SQLCODE)
+	Set tSC = ..PurgeBitmaps(pBitmapPurgeRunLimit,.tDeletedChunks)
+	Merge pDeletedCount("bitmaps") = tDeletedChunks
+	Kill tTransactionSuspendedSwitch
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="trail">
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>string,width</FormalSpec>
+<Implementation><![CDATA[
+	Set len=$l(string)
+	If len'>width Quit string
+	Quit "..."_$e(string,len-width+4,len)
+]]></Implementation>
+</Method>
+
+<Method name="SendToMonitor">
+<Description>
+Signal the Event Log entry to an external Monitor system</Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>EventID:%Integer</FormalSpec>
+<Implementation><![CDATA[
+	If $G($$$EnsSNMPWMIAlerts("SNMP"))=1 {
+		Set $$$EnsSNMPWMIAlerts("SNMP",$namespace,EventID)=1
+		#; On Windows call Windows OpenEvent(), returns '0' for success or Windows error code
+		If $$$isWINDOWS {
+			Set err=$zu(190,0)
+			If err'=0 {
+				Kill $$$EnsSNMPWMIAlerts("SNMP",$namespace,EventID)
+				Set $$$EnsSNMPWMIAlerts("SNMP")=0
+			}
+		}
+	}
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>^Ens.Util.LogD</DataLocation>
+<DefaultData>LogDefaultData</DefaultData>
+<IdLocation>^Ens.Util.LogD</IdLocation>
+<IndexLocation>^Ens.Util.LogI</IndexLocation>
+<StreamLocation>^Ens.Util.LogS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="LogDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ConfigName</Value>
+</Value>
+<Value name="3">
+<Value>Job</Value>
+</Value>
+<Value name="4">
+<Value>SessionId</Value>
+</Value>
+<Value name="5">
+<Value>SourceClass</Value>
+</Value>
+<Value name="6">
+<Value>SourceMethod</Value>
+</Value>
+<Value name="7">
+<Value>Text</Value>
+</Value>
+<Value name="8">
+<Value>TimeLogged</Value>
+</Value>
+<Value name="9">
+<Value>Type</Value>
+</Value>
+<Value name="10">
+<Value>Stack</Value>
+</Value>
+<Value name="11">
+<Value>TraceCat</Value>
+</Value>
+<Value name="12">
+<Value>MessageId</Value>
+</Value>
+<Value name="13">
+<Value>StatusValue</Value>
 </Value>
 </Data>
 </Storage>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-14 07:31:38">
+<Document name="USER.ExampleTable.LUT">
+<lookupTable>
+<entry table="USER.ExampleTable" key="key1">value1</entry>
+<entry table="USER.ExampleTable" key="key2">value2</entry>
+<entry table="USER.ExampleTable" key="key3">value3</entry>
+</lookupTable>
+</Document></Export>

@@ -1,4 +1,5 @@
 from flask import Flask, render_template, abort, request, redirect, url_for
+from lxml import etree
 
 import export_manager
 import export_generator
@@ -10,6 +11,12 @@ manager = export_manager.ExportManager()
 def page_not_found(error):
   code = 404
   description = 'Page not found'
+  return render_template('error_page_not_found.html', code=code, description=description), code
+
+@app.errorhandler(500)
+def page_not_found(error):
+  code = 500
+  description = error.description
   return render_template('error_page_not_found.html', code=code, description=description), code
 
 @app.route('/')
@@ -54,7 +61,17 @@ def edit_export(did, eid):
   if e == None:
     abort(404)
 
-  return render_template("edit_export.html", dir=d, export=e, details=e.details())
+  try:
+    error = None
+    details = e.details()
+  except etree.XMLSyntaxError as err:
+    details = None
+    error = "Error reading file. Is this valid XML?"
+  except Exception as err:
+    details = None
+    error = "Error reading file."
+
+  return render_template("edit_export.html", dir=d, export=e, details=details, error=error)
 
 @app.route("/exports/<did>/<eid>/modify", methods=['POST'])
 def modify_export(did, eid):

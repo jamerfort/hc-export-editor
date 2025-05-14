@@ -21,8 +21,32 @@ class TOC:
 
   @classmethod
   def from_exportxml_tree(cls, tree):
-      for item in tree.xpath('/Export/Project/Items/ProjectItem'):
-        name = item.get('name', '')
-        itype = item.get('type', '')
+    for item in tree.xpath('/Export/Project/Items/ProjectItem'):
+      name = item.get('name', '')
+      itype = item.get('type', '')
 
-        yield TOCEntry(name, itype)
+      yield TOCEntry(name, itype)
+
+@dataclass
+class AltTOC:
+  entries: List[TOCEntry]
+
+  @classmethod
+  def from_exportxml_tree(cls, tree):
+    # If there's an actual TOC, return nothing
+    if tree.xpath('/Export/Project/Items/ProjectItem'):
+      return
+
+    for item in tree.xpath('/*/*'):
+      itype = item.tag
+
+      if itype == 'Task':
+        name_el = item.xpath('./Name')[0]
+        name = name_el.text
+
+      else:
+        name = item.get('name', '')
+        Name = item.get('Name', '')
+        name = name or Name
+
+      yield TOCEntry(name, itype)

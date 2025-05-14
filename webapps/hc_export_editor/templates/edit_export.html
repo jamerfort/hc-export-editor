@@ -28,8 +28,16 @@
 
         <!------------------------------------------------------------------------>
         <div class="main">
-          {% if details.toc %}
+          {% if error %}
+          <div class="msg notify">{{error}}</div>
+          {% endif %}
+
+          {% if details.toc or details.alt_toc %}
           <div class="toc">
+            {% if not details.toc %}
+            <div class="msg notify">No Table of Contents found.  Is this a Production Export?</div>
+            {% endif %}
+
             <h3>Contents
               <input type="text" data-table-selector=".toc-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
             </h3>
@@ -50,15 +58,17 @@
                   </tr>
                 {% endfor %}
 
+                {% for item in details.alt_toc %}
+                  <tr>
+                    <td>{{item.type}}</td>
+                    <td>{{item.name}}</td>
+                  </tr>
+                {% endfor %}
+
               </tbody>
             </table>
 
           </div> <!-- tocs -->
-          {% else %}
-          <div class="toc">
-            <h3>Contents</h3>
-            <div class="msg">No Table of Contents found.  Is this a Production Export?</div>
-          </div>
           {% endif %}
 
           {% if details.interfaces %}

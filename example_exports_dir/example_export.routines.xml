@@ -1,0 +1,101 @@
+^MAC^routine output by %apiRTN^^~Format=IRIS.S~^UTF8
+%RO
+IPM.Installer.G1^MAC^^^0^1
+	;IPM.Installer.G1
+	;(C)InterSystems, method generator for class IPM.Installer.  Do NOT edit.
+	Quit
+	;
+#include %systemInclude
+#include %systemInclude
+#classcontext IPM.Installer
+#generator
+#classmethod Map
+Map(%class,%code,%method,%compiledclass,%compiledmethod,%parameter) public {
+  #; Let our XGL document generate code for this method.
+  Do %code.WriteLine(" Set pVars(""CURNS"")=$namespace")
+  Do %code.WriteLine(" Set prevNS = $namespace")
+  Do %code.WriteLine(" New $Namespace")
+  Do %code.WriteLine(" Set $Namespace = ""%SYS"" ")
+  Do %code.WriteLine(" Kill properties")
+  Do %code.WriteLine(" Set sc = ##class(Config.Namespaces).Get(prevNS, .properties)")
+  Do %code.WriteLine(" Set pVars(""CURNSRoutineDB"")=$Get(properties(""Routines""))")
+  Do %code.WriteLine(" Set pVars(""CURNSGlobalDB"")=$Get(properties(""Globals""))")
+  Do %code.WriteLine(" If ##class(Config.MapPackages).Exists(prevNS,""%IPM"") { Quit $$$OK }")
+  Quit ##class(%Installer.Manifest).%Generate(%compiledclass, %code, "MapOnly")
+ Quit 1 }
+#classmethod setup
+setup(%class,%code,%method,%compiledclass,%compiledmethod,%parameter) public {
+  #; Let our XGL document generate code for this method. 
+  Do %code.WriteLine(" If $Data(pVars, path)#10,path'="""" Set pVars(""MODDIR"")=path")
+  Do %code.WriteLine(" Set pVars(""CURNS"")=$namespace")
+  Do %code.WriteLine(" Set prevNS = $namespace")
+  Do %code.WriteLine(" New $Namespace")
+  Do %code.WriteLine(" Set $Namespace = ""%SYS"" ")
+  Do %code.WriteLine(" Kill properties")
+  Do %code.WriteLine(" Set sc = ##class(Config.Namespaces).Get(prevNS, .properties)")
+  Do %code.WriteLine(" Set pVars(""CURNSRoutineDB"")=$Get(properties(""Routines""))")
+  Do %code.WriteLine(" Set pVars(""CURNSGlobalDB"")=$Get(properties(""Globals""))")
+  Quit ##class(%Installer.Manifest).%Generate(%compiledclass, %code, "PM")
+ Quit 1 }
+
+bootstrap^MAC^^^0
+ /*
+	HealthShare Package Manager and Common Code Bootstrap Routine	
+ */
+.
+#include %occInclude
+#define InitTotalTime s bigtime=$zh
+#define InitTime s time1=$zh
+#define ElapsedTime s time1=$zh-time1 w "Elapsed time: "_$s(time1>60:(time1\60)_" minutes ",1:"")_(time1#60)_" seconds"
+#define ElapsedTotalTime i $d(bigtime) s bigtime=$zh-bigtime Write !!,"COMPLETE!",!,"Overall Elapsed Time: "_$s(bigtime>60:(bigtime\60)_" minutes ",1:"")_(bigtime#60)_" seconds"
+.
+#; Main entry point
+	Do install()
+	Quit
+	
+install(pClean=0) [ Root ] {
+	$$$InitTotalTime
+	Do StartLog^%buildutil()
+	Try {
+		If '$Data(Root) {
+			Try {
+				Set Root = ##class(%IPM.Storage.Module).NameOpen("ZHSLIB").Root
+			} Catch e {
+				//Ignore
+			}
+		}
+		
+		If pClean {
+			// For a clean build, get rid of %SourceControl
+			New %SourceControl
+			Kill %SourceControl
+			// Try to delete the %ZHSLIB package - display but ignore errors.
+			Do $System.OBJ.DeletePackage("%ZHSLIB")
+		}
+		
+		// Bootstrap: import everything normally
+		Set tSC = $System.OBJ.ImportDir(Root_"/databases/hscommon/inc","*.inc","ck",,1)
+		$$$ThrowOnError(tSC)
+		Set tSC = $System.OBJ.ImportDir(Root_"/databases/hscommon/cls","*.cls","ck",,1)
+		$$$ThrowOnError(tSC)
+		
+		// Reload using the package manager. This will also export the build artifact for %ZHSLIB (hsutil.xml).
+		Set tShellCommand = "load -DNoMapping=1 -DNoTransaction=1 -verbose " _ Root
+		Set tSC = ##class(%IPM.Main).Shell(tShellCommand)
+		$$$ThrowOnError(tSC)
+	} Catch e {
+		Set tSC = e.AsStatus()
+	}
+	If $$$ISERR(tSC) {
+		Write "Error: ",$System.Status.GetErrorText(tSC),!
+	}
+	$$$ElapsedTotalTime
+	Do EndLog^%buildutil()
+}
+.
+clean
+	Do install(1)
+	Quit
+
+
+

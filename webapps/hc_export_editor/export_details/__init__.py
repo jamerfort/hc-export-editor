@@ -1,4 +1,4 @@
-from .toc import TOC
+from .toc import TOC, AltTOC
 from .interface import Interface
 from .lookup_table import Table
 
@@ -14,6 +14,7 @@ class ExportDetails:
   def __init__(self, export):
     self.export = export
     self.toc = self.read_toc()
+    self.alt_toc = self.read_alttoc()
     self.interfaces = self.read_interfaces()
     self.tables = self.read_tables()
 
@@ -21,6 +22,11 @@ class ExportDetails:
     with open(self.export.path) as f:
       root = etree.parse(f)
       return list(TOC.from_exportxml_tree(root))
+
+  def read_alttoc(self):
+    with open(self.export.path) as f:
+      root = etree.parse(f)
+      return list(AltTOC.from_exportxml_tree(root))
 
   def read_interfaces(self):
     with open(self.export.path) as f:

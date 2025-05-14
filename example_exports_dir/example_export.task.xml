@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Tasks><Task>
+  <Name>Purge Backup Log</Name>
+  <RunAsUser>_SYSTEM</RunAsUser>
+  <EmailOutput>false</EmailOutput>
+  <Expires>true</Expires>
+  <OpenOutputFile>false</OpenOutputFile>
+  <OutputFileIsBinary>true</OutputFileIsBinary>
+  <SuspendOnError>false</SuspendOnError>
+  <SuspendTerminated>false</SuspendTerminated>
+  <Suspended>0</Suspended>
+  <Priority>0</Priority>
+  <TaskClass>%SYS.Task.PurgeBackupLog</TaskClass>
+  <IsBatch>false</IsBatch>
+  <NameSpace>%SYS</NameSpace>
+  <TimePeriod>0</TimePeriod>
+  <TimePeriodEvery>1</TimePeriodEvery>
+  <DailyFrequency>0</DailyFrequency>
+  <DailyStartTime>01:30:00</DailyStartTime>
+  <DailyEndTime>00:00:00</DailyEndTime>
+  <JobGUID>DFB38C27-FEE0-11EF-A5EA-000000000000</JobGUID>
+  <StartDate>2025-03-13</StartDate>
+  <LastSchedule>67339,5400</LastSchedule>
+  <LastStarted>67339,5400</LastStarted>
+  <LastFinished>67339,5400</LastFinished>
+  <MirrorStatus>3</MirrorStatus>
+  <Type>0</Type>
+  <RescheduleOnStart>false</RescheduleOnStart>
+  <DeleteAfterRun>false</DeleteAfterRun>
+  <Description>Purges messages from IRIS backup log that are more than 30 days old every night at 1:30 am</Description>
+</Task>
+
+</Tasks>
