@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Export Editor</title>
-    <link rel="icon" type="image/png" href="{{url_for('static', filename='hc-export-editor.png')}}"/>
-    <link href="{{url_for('static', filename='style.css')}}" rel="stylesheet"/>
-  </head>
-  <body>
-    <h1>Export Editor</h1>
-
-    <div id="contents">
-      <div id="error">
+{% extends "base.html" %}
+{% block title %}Error - {{description}}{% endblock %}
+{% block body %}
+      <div class="error">
         <h2>Error - {{description}}</h2>
         <div class="dir">
           <h3>{{code}} - {{description}}</h3>
         </div>
       </div>
-    </div>
-  </body>
-</html>
-
+{% endblock %}
