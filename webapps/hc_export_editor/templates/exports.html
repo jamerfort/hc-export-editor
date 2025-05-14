@@ -16,53 +16,56 @@
       <div class="notify">{{notify}}</div>
       {% endif %}
 
-      <div class="header">
-        <div class="left">
-          <h2>
-            <span>Export Directories</span>
-          </h2>
-        </div>
+      <div class="stretch">
 
-        <div class="right">
-            <input type="text" data-table-selector=".exports-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
-        </div>
-      </div> <!-- header -->
-
-      <div class="main">
-
-        <div id="directories">
-
-          {% for dir in dirs %}
-          <div class="dir">
-            <h3>
-              {{dir.path}}
-            </h3>
-
-            <table class="exports-table">
-              <thead>
-                <tr>
-                  <th>Export</th>
-                  <th>Date Modified</th>
-                </tr>
-              </thead>
-              <tbody>
-
-              {% for export in dir.exports() %}
-                <tr>
-                  <td><a href="{{url_for('edit_export', did=dir.id, eid=export.id)}}">{{export.path.name}}</a></td>
-                  <td>{{export.date_modified}}</td>
-                </tr>
-              {% endfor %}
-
-              </tbody>
-            </table>
-
+        <div class="header">
+          <div class="left">
+            <h2>
+              <span>Export Directories</span>
+            </h2>
           </div>
-          {% endfor %}
-        </div><!-- directories -->
 
-      </div><!-- main -->
-    </div>
+          <div class="right">
+              <input type="text" data-table-selector=".exports-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
+          </div>
+        </div> <!-- header -->
+
+        <div class="main">
+
+          <div id="directories">
+
+            {% for dir in dirs %}
+            <div class="dir">
+              <h3>
+                {{dir.path}}
+              </h3>
+
+              <table class="exports-table">
+                <thead>
+                  <tr>
+                    <th>Export</th>
+                    <th>Date Modified</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                {% for export in dir.exports() %}
+                  <tr>
+                    <td><a href="{{url_for('edit_export', did=dir.id, eid=export.id)}}">{{export.path.name}}</a></td>
+                    <td>{{export.date_modified}}</td>
+                  </tr>
+                {% endfor %}
+
+                </tbody>
+              </table>
+
+            </div>
+            {% endfor %}
+          </div><!-- directories -->
+
+        </div><!-- main -->
+      </div><!-- editor -->
+    </div><!-- contents -->
     <script src="{{url_for('static', filename='table_filters.js')}}"></script>
   </body>
 </html>

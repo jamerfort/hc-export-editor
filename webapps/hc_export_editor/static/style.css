@@ -141,7 +141,7 @@ h1 {
   padding: 1em;
 }
 
-.editor {
+.stretch {
   height: 100%;
   display: flex;
   flex-direction: column;
