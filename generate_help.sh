@@ -2,11 +2,6 @@
 
 . ./setup.sh
 
-if [ ! -e "$(which markdown_py)" ]
-then
-  pip install markdown
-fi
-
 rm webapps/hc_export_editor/static/docs/images/*
 cp -p docs/images/* webapps/hc_export_editor/static/docs/images/
 
