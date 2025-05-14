@@ -86,7 +86,7 @@
                       {% endif %}
 
                       <td>{{setting.name}}</td>
-                      <td><div>{{setting.value}}</div></td>
+                      <td class="ellipsis" title="{{setting.value}}">{{setting.value}}</td>
 
                       <td><input type="text" autocomplete="off" autofocus tabindex="1"
                             name="{{interface.form_name()}}|{{setting.form_name()}}"
@@ -130,7 +130,7 @@
                       {% endif %}
 
                       <td>{{row.key}}</td>
-                      <td>{{row.value}}</td>
+                      <td class="ellipsis" title="{{row.value}}">{{row.value}}</td>
 
                       <td><input type="text" autocomplete="off" autofocus tabindex="1"
                             name="{{table.form_name()}}|{{row.form_name()}}"
