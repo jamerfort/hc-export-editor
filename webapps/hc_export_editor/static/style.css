@@ -130,6 +130,10 @@ tr > .ellipsis {
   text-overflow: ellipsis;
 }
 
+tr > *:hover + * {
+  opacity: .1;
+}
+
 .notify {
   padding: 1em;
   margin-bottom: 1em;
