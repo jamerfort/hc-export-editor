@@ -32,6 +32,35 @@
           <div class="msg notify">{{error}}</div>
           {% endif %}
 
+          {% if details.notes %}
+          <div class="notes">
+            <h3>Export Notes
+              <input type="text" data-table-selector=".notes-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
+            </h3>
+
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for note in details.notes %}
+                  {% for field, value in note.as_fields() %}
+                    <tr>
+                      <td>{{field}}</td>
+                      <td>{{value}}</td>
+                    </tr>
+                  {% endfor %}
+                {% endfor %}
+              </tbody>
+            </table>
+
+          </div> <!-- notes -->
+          {% endif %}
+
           {% if details.toc or details.alt_toc %}
           <div class="toc">
             {% if not details.toc %}
