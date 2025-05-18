@@ -92,9 +92,9 @@
                   {% for setting in interface.settings_and_attrs() %}
                     <tr class="{{(loop.last and 'last') or ''}}">
                       {% if loop.first %}
-                       <td>{{interface.name}}</td>
+                       <td class="first">{{interface.name}}</td>
                       {% else %}
-                       <td></td>
+                       <td class="hidden">{{interface.name}}</td>
                       {% endif %}
 
                       <td>{{setting.name}}</td>
@@ -136,9 +136,9 @@
                   {% for row in table.rows %}
                     <tr class="{{(loop.last and 'last') or ''}}">
                       {% if loop.first %}
-                       <td>{{table.name}}</td>
+                       <td class="first">{{table.name}}</td>
                       {% else %}
-                       <td></td>
+                       <td class="hidden">{{table.name}}</td>
                       {% endif %}
 
                       <td>{{row.key}}</td>

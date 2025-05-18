@@ -21,11 +21,13 @@ function debounce(fn, timeoutMs) {
 
 function filter_table(table, filter) {
   const FILTERED_CLASS = 'filtered';
+  const NOTFILTERED_CLASS = 'not-filtered';
 
   if (filter == '') {
     // restore all rows
     table.querySelectorAll('tbody tr').forEach(tr => {
       tr.classList.remove(FILTERED_CLASS);
+      tr.classList.remove(NOTFILTERED_CLASS);
     })
 
     return;
@@ -38,8 +40,10 @@ function filter_table(table, filter) {
 
     if (matches_filter) {
       tr.classList.remove(FILTERED_CLASS);
+      tr.classList.add(NOTFILTERED_CLASS);
     } else {
       tr.classList.add(FILTERED_CLASS);
+      tr.classList.remove(NOTFILTERED_CLASS);
     }
   });
 }

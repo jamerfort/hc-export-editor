@@ -144,6 +144,22 @@ tr > *:hover + * {
   display: none;
 }
 
+tr td.first {
+  border: none;
+}
+
+tr td.hidden {
+  color: transparent;
+  user-select: none;
+  border-width: 0px;
+}
+
+tr.not-filtered td.hidden {
+  color: inherit;
+  user-select: all;
+  border-width: 1px;
+}
+
 /* Layout ***************************************************/
 html, body {
   position: absolute;
