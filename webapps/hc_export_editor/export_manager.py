@@ -1,5 +1,6 @@
-from export_details import ExportDetails
+from collections import OrderedDict
 from dataclasses import dataclass
+from export_details import ExportDetails
 import datetime
 import os
 from pathlib import Path
@@ -25,8 +26,8 @@ class Directory:
       if e.is_valid():
         yield e
 
-  def exports(self, sortby='inode'):
-    rslt = sorted(self._exports(), key=lambda e: getattr(e, sortby))
+  def exports(self, sortby='mtime', reverse=True):
+    rslt = sorted(self._exports(), key=lambda e: getattr(e, sortby), reverse=reverse)
     return rslt
 
   def get_export(self, id, default=None):
@@ -43,6 +44,7 @@ class Export:
   inode: int
   link: str
   date_modified: str = ''
+  mtime: int = 0
 
   @classmethod
   def from_path(cls, path, linkbase):
@@ -50,8 +52,9 @@ class Export:
     inode = stat.st_ino
     id = str(inode)
     link = f'{linkbase}/{id}'
+    mtime = stat.st_mtime
     date_modified = datetime.datetime.fromtimestamp(stat.st_mtime)
-    return Export(id, path, inode, link, date_modified)
+    return Export(id, path, inode, link, date_modified, mtime)
 
   def is_valid(self):
     if self.path.is_dir():
@@ -71,14 +74,16 @@ class ExportManager:
     self.reload()
 
   def reload(self, dirs=None, exports_glob="*.xml"):
-    dirs = self._find_dirs_exists(dirs)
+    dirs = sorted(self._find_dirs_exists(dirs), key=lambda d: d.name)
 
     dirs = [
       Directory.from_path(p, exports_glob=exports_glob)
       for p in dirs
     ]
 
-    self.dirs_by_id = {d.id: d for d in dirs}
+    self.dirs_by_id = OrderedDict()
+    for d in dirs:
+      self.dirs_by_id[d.id] = d
 
   @classmethod
   def _find_dirs_exists(cls, dirs=None):
@@ -134,5 +139,5 @@ class ExportManager:
     except:
       pass
 
-  def dirs(self, sortkey="id"):
+  def dirs(self, sortkey="path"):
     return sorted(self.dirs_by_id.values(), key=lambda d: getattr(d, sortkey))
