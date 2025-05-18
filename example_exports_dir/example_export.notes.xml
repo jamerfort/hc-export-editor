@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Ubuntu Server LTS for x86-64 Containers) 2025.1 (Build 223U)" ts="2025-05-18 20:05:35">
+<Project name="EnsExportItem_2025-05-18 20-00-12_782+0" LastModified="2025-05-18 20:05:35.11561415">
+  <ProjectDescription>Studio Project generated starting from Production Configuration Item 'USER.NewProduction : test_out' at 2025-05-18 20:00:12.782 UTC</ProjectDescription>
+  <Items>
+    <ProjectItem name="Settings:test_out.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportItem_2025-05-18 20-00-12_782+0.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Document name="EnsExportNotes.EnsExportItem_2025-05-18 20-00-12_782+0.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportItem_2025-05-18 20-00-12_782+0" description="Export Notes for export EnsExportItem_2025-05-18 20-00-12_782+0">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>A4AD47589AF0</Machine>
+<Instance>IRIS</Instance>
+<Namespace>HSSYS</Namespace>
+<SourceProduction>USER.NewProduction</SourceProduction>
+<Username>SuperUser</Username>
+<UTC>2025-05-18 20:05:35.114</UTC>
+</Creation>
+<Notes>
+<Line num="1">These are the notes in this export.</Line>
+</Notes>
+<Contents>
+<ExportProject>EnsExportItem_2025-05-18 20-00-12_782+0</ExportProject>
+<Item num="1">Settings:test_out.PTD</Item>
+</Contents>
+<ProductionClassInExport></ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:test_out.PTD"><ProjectTextDocument name="Settings:test_out" description="Settings for test_out in Production USER.NewProduction">
+<![CDATA[<Item Name="test_out" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="This is a &lt;test&gt;!" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="AlertGroups"><![CDATA[<test>]*]></Setting></Item>
+]]></ProjectTextDocument>
+</Document></Export>

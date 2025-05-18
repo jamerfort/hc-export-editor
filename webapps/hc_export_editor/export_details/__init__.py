@@ -14,33 +14,27 @@ class ExportDetails:
 
   def __init__(self, export):
     self.export = export
-    self.notes = self.read_notes()
-    self.toc = self.read_toc()
-    self.alt_toc = self.read_alttoc()
-    self.interfaces = self.read_interfaces()
-    self.tables = self.read_tables()
 
-  def read_notes(self):
     with open(self.export.path) as f:
       root = etree.parse(f)
-      return list(Notes.from_exportxml_tree(root))
 
-  def read_toc(self):
-    with open(self.export.path) as f:
-      root = etree.parse(f)
-      return list(TOC.from_exportxml_tree(root))
+      self.notes = self.read_notes(root)
+      self.toc = self.read_toc(root)
+      self.alt_toc = self.read_alttoc(root)
+      self.interfaces = self.read_interfaces(root)
+      self.tables = self.read_tables(root)
 
-  def read_alttoc(self):
-    with open(self.export.path) as f:
-      root = etree.parse(f)
-      return list(AltTOC.from_exportxml_tree(root))
+  def read_notes(self, root):
+    return list(Notes.from_exportxml_tree(root))
 
-  def read_interfaces(self):
-    with open(self.export.path) as f:
-      root = etree.parse(f)
-      return list(Interface.from_exportxml_tree(root))
+  def read_toc(self, root):
+    return list(TOC.from_exportxml_tree(root))
 
-  def read_tables(self):
-    with open(self.export.path) as f:
-      root = etree.parse(f)
-      return list(Table.from_exportxml_tree(root))
+  def read_alttoc(self, root):
+    return list(AltTOC.from_exportxml_tree(root))
+
+  def read_interfaces(self, root):
+    return list(Interface.from_exportxml_tree(root))
+
+  def read_tables(self, root):
+    return list(Table.from_exportxml_tree(root))
