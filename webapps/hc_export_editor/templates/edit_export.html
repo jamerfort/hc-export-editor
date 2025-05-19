@@ -32,8 +32,17 @@
           <div class="msg notify">{{error}}</div>
           {% endif %}
 
+          <nav>
+            <ol>
+              <li><a href="#notes">Export Notes</a></li>
+              <li><a href="#toc">Table of Contents</a></li>
+              <li><a href="#interfaces">Interface Settings</a></li>
+              <li><a href="#tables">Lookup Tables</a></li>
+            </ol>
+          </nav>
+
           {% if details.notes %}
-          <div class="notes">
+          <div class="notes" id="notes">
             <h3>Export Notes
               <input type="text" data-table-selector=".notes-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
             </h3>
@@ -62,12 +71,12 @@
           {% endif %}
 
           {% if details.toc or details.alt_toc %}
-          <div class="toc">
+          <div class="toc" id="toc">
             {% if not details.toc %}
             <div class="msg notify">No Table of Contents found.  Is this a Production Export?</div>
             {% endif %}
 
-            <h3>Contents
+            <h3>Table of Contents
               <input type="text" data-table-selector=".toc-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
             </h3>
 
@@ -101,7 +110,7 @@
           {% endif %}
 
           {% if details.interfaces %}
-          <div class="interfaces">
+          <div class="interfaces" id="interfaces">
             <h3>Interface Settings
               <input type="text" data-table-selector=".interfaces-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
             </h3>
@@ -144,7 +153,7 @@
           {% endif %}
 
           {% if details.tables %}
-          <div class="tables">
+          <div class="tables" id="tables">
             <h3>
               <span>Lookup Tables</span>
               <input type="text" data-table-selector=".tables-table" class="filter" placeholder="Filter..." autocomplete="off" tabindex="1"/>
@@ -186,6 +195,7 @@
 
           </div> <!-- tables -->
           {% endif %}
+          <div class="padding"></div>
         </div> <!-- main -->
 
         <!------------------------------------------------------------------------>

@@ -221,6 +221,22 @@ h1 {
   padding: 1em;
 }
 
+.main:has(nav) {
+  margin-left: 15em;
+}
+
+.main .padding {
+  height: 100%;
+}
+
+  .main nav {
+    position: absolute;
+    left: 0;
+  }
+  .main nav ol {
+    margin: 1em;
+  }
+
   h2 ,
   h3 ,
   .main h3 {
