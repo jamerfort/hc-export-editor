@@ -119,6 +119,9 @@ table {
 
 table td, table th {
   vertical-align: top;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  
 }
 
 table input {
@@ -137,10 +140,6 @@ tr > .ellipsis {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-tr > *:hover + * {
-  opacity: .1;
 }
 
 .notify {
