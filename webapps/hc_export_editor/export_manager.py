@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from dataclasses import dataclass
-from export_details import ExportDetails
+from export_details import ExportDetails, TOC, AltTOC, Notes
+from lxml import etree
+from typing import List
 import datetime
 import os
 from pathlib import Path
@@ -45,6 +47,8 @@ class Export:
   link: str
   date_modified: str = ''
   mtime: int = 0
+  _notes: List[Notes] = None
+  _contents: List[TOC] = None
 
   @classmethod
   def from_path(cls, path, linkbase):
@@ -67,7 +71,36 @@ class Export:
 
   def details(self):
     return ExportDetails.from_export(self)
-      
+
+  def __parse_file(self):
+    if self._notes == None or self._contents == None:
+      try:
+        with open(self.path) as f:
+          root = etree.parse(f)
+
+          self._notes = list(Notes.from_exportxml_tree(root))
+
+          self._contents = [
+            *TOC.from_exportxml_tree(root),
+            *AltTOC.from_exportxml_tree(root),
+          ]
+
+      except Exception as e:
+        pass
+
+  def contents(self):
+    self.__parse_file()
+    return self._contents or []
+
+  def content_names(self):
+    return [c.name for c in self.contents()]
+
+  def notes(self):
+    self.__parse_file()
+    if self._notes:
+      return self._notes[0]
+
+    return None
 
 class ExportManager:
   def __init__(self, dirs=None, exports_glob="*.xml"):

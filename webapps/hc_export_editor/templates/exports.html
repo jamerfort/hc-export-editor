@@ -47,6 +47,9 @@
                   <tr>
                     <th>Export</th>
                     <th>Date Modified</th>
+                    <th>User</th>
+                    <th>Machine</th>
+                    <th>Contents</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -55,6 +58,23 @@
                   <tr>
                     <td><a href="{{url_for('edit_export', did=dir.id, eid=export.id)}}">{{export.path.name}}</a></td>
                     <td>{{export.date_modified}}</td>
+
+                    {% set note = export.notes() %}
+                    {% if note %}
+                      <td>{{note.user}}</td>
+                      <td>{{note.machine}}</td>
+                    {% else %}
+                      <td></td>
+                      <td></td>
+                    {% endif %}
+
+                    <td>
+                      <ul>
+                        {% for c in export.content_names() %}
+                          <li>{{c}}</li>
+                        {% endfor %}
+                      </ul>
+                    </td>
                   </tr>
                 {% endfor %}
 
