@@ -107,7 +107,7 @@ class ExportManager:
     self.reload()
 
   def reload(self, dirs=None, exports_glob="*.xml"):
-    dirs = sorted(self._find_dirs_exists(dirs), key=lambda d: d.name)
+    dirs = self._find_dirs_exists(dirs)
 
     dirs = [
       Directory.from_path(p, exports_glob=exports_glob)
@@ -172,5 +172,5 @@ class ExportManager:
     except:
       pass
 
-  def dirs(self, sortkey="path"):
-    return sorted(self.dirs_by_id.values(), key=lambda d: getattr(d, sortkey))
+  def dirs(self):
+    return self.dirs_by_id.values()
