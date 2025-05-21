@@ -174,6 +174,11 @@ This section contains the file name of the export being modified and the directo
 
 The `Directory` link will take you back to the `hc-export-editor/exports` page, that lists all the configured directories and their contents.
 
+#### "Export Notes" Section
+This section of the editor displays the settings related to the export, such as Production, Namespace, User, etc.  You can use the filter box to the top-right to search the list of export fields.
+
+![Image: Modify Export - Export Notes](./docs/images/notes.png)
+
 #### "Contents" Section
 This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can not currently edit the list of items in the export.
 
