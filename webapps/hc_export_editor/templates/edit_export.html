@@ -35,7 +35,7 @@
           <nav>
             <ol>
               {% if details.notes %}<li><a href="#notes">Export Notes</a></li>{% endif %}
-              {% if details.toc %}<li><a href="#toc">Table of Contents</a></li>{% endif %}
+              {% if details.toc or details.alt_toc %}<li><a href="#toc">Table of Contents</a></li>{% endif %}
               {% if details.interfaces %}<li><a href="#interfaces">Interface Settings</a></li>{% endif %}
               {% if details.tables %}<li><a href="#tables">Lookup Tables</a></li>{% endif %}
             </ol>
