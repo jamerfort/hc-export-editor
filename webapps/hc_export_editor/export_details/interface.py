@@ -96,12 +96,15 @@ class Interface:
 
         elif change.type == 'Attr':
           if change.name == 'Name':
-            # TODO: Handle renaming interfaces
-            pass
-            continue
+            ptd.set('name', f'Settings:{change.value}')
+            doc = ptd.getparent()
+            doc.set('name', f'Settings:{change.value}.PTD')
+
+            # allow to fall through to set the attribute
 
           if item.get(change.name) != change.value:
             item.set(change.name, change.value)
+            modified = True
 
       if modified:
         ptd.text = etree.CDATA('\n' + etree.tostring(item, encoding='unicode', method='xml') + '\n')
