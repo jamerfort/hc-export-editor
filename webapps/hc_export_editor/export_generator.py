@@ -1,5 +1,6 @@
 from export_details.interface import Interface
 from export_details.lookup_table import Table
+from export_details.toc import TOC
 
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -32,28 +33,31 @@ def form_to_changes(form):
   changes = OrderedDict()
 
   for (fullkey, value) in form.items():
+    # key|subkeys[|action]
+    # keytype:keyname|changetype:changename[|action]
     # Table:USER.ExampleTable|Row:key1
     # Interface:operation1|Attr:Name
     # Interface:operation3|Setting:HTTPPort
     # Interface:operation3|Setting:HTTPPort|set
     # Interface:operation1|Setting:HTTPPort|delete
-    key, subkeys = fullkey.split('|', 1)
+    # TOC:3848931|PTD:Settings:operation3.PTD|delete
+    key, _, subkeys = fullkey.partition('|')
     if '|' in subkeys:
-      subkeys, action = subkeys.split('|', 1)
+      subkeys, _, action = subkeys.partition('|')
     else:
       action = ''
 
     if not action:
       action = 'set'
     
-    keytype, keyname = key.split(':', 1)
+    keytype, _, keyname = key.partition(':')
 
     if key not in changes:
       changes[key] = Item(keytype, keyname, [])
 
     item = changes[key]
 
-    changetype, changename = subkeys.split(':', 1)
+    changetype, _, changename = subkeys.partition(':')
     change = Change(action, changetype, changename, value)
     item.changes.append(change)
 
@@ -64,7 +68,12 @@ def generate_export(export_path, changes):
     parser = etree.XMLParser(strip_cdata=False)
     root = etree.parse(f, parser)
 
-    change_types = set([k.split(':')[0] for k in changes.keys()])
+    change_types = set([k.partition(':')[0] for k in changes.keys()])
+
+    if 'TOC' in change_types:
+      # This will remove any items being removed
+      # before modifying the same items below.
+      TOC.apply_changes(root, changes)
     
     if 'Interface' in change_types:
       Interface.apply_changes(root, changes)

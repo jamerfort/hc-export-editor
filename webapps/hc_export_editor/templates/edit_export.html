@@ -92,7 +92,12 @@
                 {% for item in details.toc %}
                   <tr>
                     <td>{{item.type}}</td>
-                    <td>{{item.name}}</td>
+                    <td>{{item.name}}
+                      <input type="checkbox" class="delete" autocomplete="off" tabindex="2"
+                          name="{{item.form_name()}}||delete"
+                          id="{{item.form_name()}}||delete"/>
+                      <label class="delete" for="{{item.form_name()}}||delete">X</label>
+                    </td>
                   </tr>
                 {% endfor %}
 

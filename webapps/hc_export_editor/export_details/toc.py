@@ -6,14 +6,8 @@ class TOCEntry:
   name: str
   type: str
 
-  @classmethod
-  def from_element(cls, el):
-    key = el.get('key', '')
-    value = el.text
-    return Row(key, value)
-
   def form_name(self):
-    return f'Row:{self.key}'
+    return f'TOC:{self.name}'
 
 @dataclass
 class TOC:
@@ -26,6 +20,37 @@ class TOC:
       itype = item.get('type', '')
 
       yield TOCEntry(name, itype)
+
+  @classmethod
+  def apply_changes(cls, tree, changes):
+    for item in tree.xpath('/Export/Project/Items/ProjectItem'):
+      name = item.get('name', '')
+      itype = item.get('type', '')
+
+      item_changes = changes.get(f'TOC:{name}', None)
+      if item_changes == None:
+        # skip to next toc item
+        continue
+      
+      for change in item_changes.changes:
+        print(change)
+        # Make sure we can't escape quotes
+        if '"' in change.name:
+          continue
+
+        if change.action == 'delete':
+          # Remove from toc
+          item.getparent().remove(item)
+
+          # Remove from body
+          for doc in tree.xpath('/Export/*'):
+            docname = doc.get('name')
+            docName = doc.get('Name')
+            docname = docname or docName
+
+            if docname == name:
+              doc.getparent().remove(doc)
+              break
 
 @dataclass
 class AltTOC:
