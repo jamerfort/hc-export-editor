@@ -167,6 +167,8 @@ The filter box allows you to narrow down the display to only the rows you are in
 
 Most tables have a `New Value` column that is editable.  Changing the values in this column will change the corresponding value in the generated, modified export.  Use the `tab` key to jump from editable cell to editable cell.
 
+Each Interface Setting can be removed from the export by clicking on the red `X` next to the setting names.
+
 #### Header Section
 This section contains the file name of the export being modified and the directory that contains the export.
 
@@ -193,12 +195,16 @@ You can use the filter box to the top-right to narrow down the list of displayed
 
 ![Image: Modify Export - Port Filtering](./docs/images/ports.png)
 
+You can also remove settings from the export by clicking the red `X` next to each setting name.
+
 #### "Lookup Tables" Section
 This section of the editor allows you to edit the values of any lookup tables included in the export.
 
 You can use the filter box to the top-right to narrow down the list of displayed rows.
 
 ![Image: Modify Export - Lookup Tables](./docs/images/lookup_tables.png)
+
+You can also individual rows from the export by clicking the red `X` next to each row's key.
 
 #### Saving the Changes
 After you've made changes to the settings in the tables above, you can either type `Enter` (while in an text box or editable field) or you can click the `Generate Modified Export` button at the top-right of the page.
