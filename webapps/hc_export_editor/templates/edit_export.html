@@ -135,7 +135,15 @@
                        <td class="hidden">{{interface.name}}</td>
                       {% endif %}
 
-                      <td>{{setting.name}}</td>
+                      <td>{{setting.name}}
+                        {% if not setting.name.startswith('@') %}
+                        <input type="checkbox" class="delete" autocomplete="off" tabindex="2"
+                            name="{{interface.form_name()}}|{{setting.form_name()}}|delete"
+                            id="{{interface.form_name()}}|{{setting.form_name()}}|delete"/>
+                        <label class="delete" for="{{interface.form_name()}}|{{setting.form_name()}}|delete">X</label>
+                        {% endif %}
+                      </td>
+
                       <td class="ellipsis" title="{{setting.value}}">{{setting.value}}</td>
 
                       <td><input type="text" autocomplete="off" autofocus tabindex="1"
@@ -179,7 +187,13 @@
                        <td class="hidden">{{table.name}}</td>
                       {% endif %}
 
-                      <td>{{row.key}}</td>
+                      <td>{{row.key}}
+                        <input type="checkbox" class="delete" autocomplete="off" tabindex="2"
+                            name="{{table.form_name()}}|{{row.form_name()}}|delete"
+                            id="{{table.form_name()}}|{{row.form_name()}}|delete"/>
+                        <label class="delete" for="{{table.form_name()}}|{{row.form_name()}}|delete">X</label>
+                      </td>
+
                       <td class="ellipsis" title="{{row.value}}">{{row.value}}</td>
 
                       <td><input type="text" autocomplete="off" autofocus tabindex="1"

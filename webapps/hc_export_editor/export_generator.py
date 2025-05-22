@@ -17,6 +17,7 @@ from typing import List
 
 @dataclass
 class Change:
+  action: str
   type: str
   name: str
   value: str
@@ -31,7 +32,20 @@ def form_to_changes(form):
   changes = OrderedDict()
 
   for (fullkey, value) in form.items():
+    # Table:USER.ExampleTable|Row:key1
+    # Interface:operation1|Attr:Name
+    # Interface:operation3|Setting:HTTPPort
+    # Interface:operation3|Setting:HTTPPort|set
+    # Interface:operation1|Setting:HTTPPort|delete
     key, subkeys = fullkey.split('|', 1)
+    if '|' in subkeys:
+      subkeys, action = subkeys.split('|', 1)
+    else:
+      action = ''
+
+    if not action:
+      action = 'set'
+    
     keytype, keyname = key.split(':', 1)
 
     if key not in changes:
@@ -40,7 +54,8 @@ def form_to_changes(form):
     item = changes[key]
 
     changetype, changename = subkeys.split(':', 1)
-    item.changes.append(Change(changetype, changename, value))
+    change = Change(action, changetype, changename, value)
+    item.changes.append(change)
 
   return changes
 

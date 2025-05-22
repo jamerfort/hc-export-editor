@@ -90,19 +90,23 @@ class Interface:
 
         if change.type == 'Setting':
           for s in item.xpath(f'//Setting[@Name="{change.name}"]'):
-            if s.text != change.value:
+            if change.action == 'set' and s.text != change.value:
               s.text = change.value
               modified = True
 
+            elif change.action == 'delete':
+              s.getparent().remove(s)
+              modified = True
+
         elif change.type == 'Attr':
-          if change.name == 'Name':
+          if change.action == 'set' and change.name == 'Name':
             ptd.set('name', f'Settings:{change.value}')
             doc = ptd.getparent()
             doc.set('name', f'Settings:{change.value}.PTD')
 
             # allow to fall through to set the attribute
 
-          if item.get(change.name) != change.value:
+          if change.action == 'set' and item.get(change.name) != change.value:
             item.set(change.name, change.value)
             modified = True
 

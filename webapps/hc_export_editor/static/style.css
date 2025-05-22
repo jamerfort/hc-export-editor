@@ -10,6 +10,7 @@
   --input-color: #001c00;
   --sep-color: #528044;
   --mute-color: #333;
+  --delete-color: #df2c2c;
 
   --link-visited-color: rgb(225,255,0);
   --link-color: #3bfc00;
@@ -69,6 +70,10 @@ table input {
   border: 0;
 }
 
+table input.delete:focus {
+  outline: none;
+}
+
 .help img {
   border: 2px solid var(--color-text);
 }
@@ -97,6 +102,34 @@ table td, table input {
 
 table input {
   font-size: 1em;
+}
+
+table input.delete {
+  font-size: .5em;
+  display: none;
+}
+
+table label.delete {
+  font-size: 1em;
+  color: red;
+  font-weight: bold;
+  float: right;
+  margin-right: .5em;
+}
+
+table tr:has(input.delete:checked) {
+  td, input {
+    text-decoration: line-through;
+    background: var(--delete-color);
+  }
+
+  td:first-child {
+    text-decoration: none;
+  }
+
+  label.delete {
+    color: white;
+  }
 }
 
 .help {
@@ -284,10 +317,10 @@ h1 {
   .main .interfaces-table tr > *:nth-child(3) { width: 35%; }
   .main .interfaces-table tr > *:nth-child(4) { width: 35%; }
 
-  .main .tables-table tr > *:nth-child(1) { width: 10%; }
+  .main .tables-table tr > *:nth-child(1) { width: 20%; }
   .main .tables-table tr > *:nth-child(2) { width: 20%; }
-  .main .tables-table tr > *:nth-child(3) { width: 35%; }
-  .main .tables-table tr > *:nth-child(4) { width: 35%; }
+  .main .tables-table tr > *:nth-child(3) { width: 30%; }
+  .main .tables-table tr > *:nth-child(4) { width: 30%; }
 
   .help h2, .help h3 {
     margin-top: 2em;

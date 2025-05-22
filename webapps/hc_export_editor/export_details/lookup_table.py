@@ -50,6 +50,10 @@ class Table:
 
         if change.type == 'Row':
           for r in lut.xpath(f'./entry[@key="{change.name}"]'):
-            if r.text != change.value:
+            if change.action == 'set' and r.text != change.value:
               r.text = change.value
+              modified = True
+
+            elif change.action == 'delete':
+              r.getparent().remove(r)
               modified = True
