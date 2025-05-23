@@ -3,7 +3,7 @@ An InterSystems IRIS/Health Connect Production Export Editor
 
 ![Image: Modify Export](./docs/images/export_editor.png)
 
-Have you ever needed to change an IP or port before deploying an interface to production?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?
+Have you ever needed to change an IP or port before deploying an interface to production?  Needed to remove items from an export?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?
 
 If you've ever needed to make any changes to an interface or lookup table before deploying to production, this `Export Editor` is for you!
 
@@ -16,7 +16,8 @@ This library was originally created/published for the [InterSystems FHIR and Dig
 
 This tool allows you to:
   - change any setting on an interface (whether a Business Service, Process, or Operation)
-  - modify any value in a lookup table.
+  - modify any value in a lookup table
+  - remove items from an export.
 
 ## Prerequisites
 - IRIS 2022.1+ (for Embedded Python support)
@@ -167,7 +168,7 @@ The filter box allows you to narrow down the display to only the rows you are in
 
 Most tables have a `New Value` column that is editable.  Changing the values in this column will change the corresponding value in the generated, modified export.  Use the `tab` key to jump from editable cell to editable cell.
 
-Each Interface Setting can be removed from the export by clicking on the red `X` next to the setting names.
+Export Items, Interface Settings, and Lookup Table rows can be removed from the export by clicking on the red `X` next to item/setting/row.
 
 #### Header Section
 This section contains the file name of the export being modified and the directory that contains the export.
@@ -181,8 +182,8 @@ This section of the editor displays the settings related to the export, such as 
 
 ![Image: Modify Export - Export Notes](./docs/images/notes.png)
 
-#### "Contents" Section
-This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can not currently edit the list of items in the export.
+#### "Table of Contents" Section
+This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can remove an item from the export by clicking the associated red `X`.
 
 ![Image: Modify Export - Contents](./docs/images/contents.png)
 

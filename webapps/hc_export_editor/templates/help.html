@@ -5,7 +5,7 @@
 <h1>hc-export-editor</h1>
 <p>An InterSystems IRIS/Health Connect Production Export Editor</p>
 <p><img src="{{url_for('static', filename='./docs/images/export_editor.png')}}" alt="Image: Modify Export" /></p>
-<p>Have you ever needed to change an IP or port before deploying an interface to production?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?</p>
+<p>Have you ever needed to change an IP or port before deploying an interface to production?  Needed to remove items from an export?  What about modifying the value(s) in a lookup table before deploying?  Have you wanted to disable an interface before deploying?  What about adding a comment, category, or alert setting to an interface before deploying to production?</p>
 <p>If you've ever needed to make any changes to an interface or lookup table before deploying to production, this <code>Export Editor</code> is for you!</p>
 <h3>InterSystems FHIR and Digital Health Interoperability Contest 2025</h3>
 <p>This library was originally created/published for the <a href="https://community.intersystems.com/post/intersystems-fhir-and-digital-health-interoperability-contest-2025">InterSystems FHIR and Digital Health Interoperability Contest 2025</a>.</p>
@@ -14,7 +14,8 @@
 <p>This tool allows you to:</p>
 <ul>
 <li>change any setting on an interface (whether a Business Service, Process, or Operation)</li>
-<li>modify any value in a lookup table.</li>
+<li>modify any value in a lookup table</li>
+<li>remove items from an export.</li>
 </ul>
 <h2>Prerequisites</h2>
 <ul>
@@ -160,7 +161,7 @@ zpm:USER&gt;install hc-export-editor
 <p>This page contains various sections, each with its own table and filter box.</p>
 <p>The filter box allows you to narrow down the display to only the rows you are interested in viewing or editing.</p>
 <p>Most tables have a <code>New Value</code> column that is editable.  Changing the values in this column will change the corresponding value in the generated, modified export.  Use the <code>tab</code> key to jump from editable cell to editable cell.</p>
-<p>Each Interface Setting can be removed from the export by clicking on the red <code>X</code> next to the setting names.</p>
+<p>Export Items, Interface Settings, and Lookup Table rows can be removed from the export by clicking on the red <code>X</code> next to item/setting/row.</p>
 <h4>Header Section</h4>
 <p>This section contains the file name of the export being modified and the directory that contains the export.</p>
 <p><img src="{{url_for('static', filename='./docs/images/header.png')}}" alt="Image: Modify Export - Header" /></p>
@@ -168,8 +169,8 @@ zpm:USER&gt;install hc-export-editor
 <h4>&quot;Export Notes&quot; Section</h4>
 <p>This section of the editor displays the settings related to the export, such as Production, Namespace, User, etc.  You can use the filter box to the top-right to search the list of export fields.</p>
 <p><img src="{{url_for('static', filename='./docs/images/notes.png')}}" alt="Image: Modify Export - Export Notes" /></p>
-<h4>&quot;Contents&quot; Section</h4>
-<p>This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can not currently edit the list of items in the export.</p>
+<h4>&quot;Table of Contents&quot; Section</h4>
+<p>This section of the editor displays the list of items included in the selected export.  You can use the filter box to the top-right to search the list of contents.  You can remove an item from the export by clicking the associated red <code>X</code>.</p>
 <p><img src="{{url_for('static', filename='./docs/images/contents.png')}}" alt="Image: Modify Export - Contents" /></p>
 <h4>&quot;Interface Settings&quot; Section</h4>
 <p>This section of the editor allows you to edit the various settings and attributes of any interfaces (Business Services, Processes, or Operations) included in the export.</p>
