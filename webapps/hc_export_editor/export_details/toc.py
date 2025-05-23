@@ -33,7 +33,6 @@ class TOC:
         continue
       
       for change in item_changes.changes:
-        print(change)
         # Make sure we can't escape quotes
         if '"' in change.name:
           continue
